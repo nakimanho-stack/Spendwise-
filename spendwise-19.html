@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SpendWise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Tajawal:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B2E2C;
+    --teal:#145C56;
+    --teal-light:#2C8C82;
+    --teal-pale:#E3EFEC;
+    --sand:#F3EAD8;
+    --cream:#FBF6EC;
+    --amber:#D4A24C;
+    --amber-dark:#B5822E;
+    --terracotta:#C1512E;
+    --ink-soft:#4B615F;
+    --border:#E7DCC6;
+    --on-accent:#FBF6EC;
+    --accent:#D4A24C;
+    --accent-dark:#B5822E;
+    --text-accent:var(--ink);
+    --font-display:'Poppins', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --safe-t: env(safe-area-inset-top,0px);
+    --safe-b: env(safe-area-inset-bottom,0px);
+  }
+  html[dir="rtl"]{ --font-display:'Cairo', sans-serif; --font-body:'Tajawal', sans-serif; }
+  html.dark{
+    --ink:#FFFFFF; --ink-soft:#D9E6E3; --cream:#0E2624; --sand:#123430; --border:#2A5951;
+    --teal:#1D6E67; --teal-pale:#123430;
+  }
+  html.dark body, html.dark input, html.dark select{ color:#FFFFFF; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--font-body);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(44,140,130,.55) 0%, transparent 42%),
+      radial-gradient(circle at 85% 15%, rgba(212,162,76,.4) 0%, transparent 38%),
+      radial-gradient(circle at 20% 85%, rgba(193,81,46,.4) 0%, transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(27,74,69,.6) 0%, transparent 45%),
+      var(--ink);
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:0;
+  }
+  html.dark body{ background: radial-gradient(circle at 15% 10%, #0f2e2a 0%, transparent 42%), radial-gradient(circle at 85% 15%, #2a2210 0%, transparent 38%), radial-gradient(circle at 20% 85%, #2a140c 0%, transparent 40%), radial-gradient(circle at 85% 85%, #081c19 0%, transparent 45%), #030b0a; }
+  .num{ font-family:'Space Grotesk', sans-serif; }
+  button, select, input{ font-family:inherit; }
+
+  .phone{
+    width:100%; max-width:430px; height:100dvh;
+    background:rgba(251,246,236,.82);
+    backdrop-filter:blur(34px) saturate(160%);
+    -webkit-backdrop-filter:blur(34px) saturate(160%);
+    border-radius:0; border:1px solid rgba(255,255,255,.35);
+    position:relative; overflow:hidden;
+    display:flex; flex-direction:column;
+    transition:background .2s;
+  }
+  html.dark .phone{ background:rgba(8,22,20,.88); border-color:rgba(255,255,255,.08); }
+  @media (min-width:560px) and (min-height:760px){
+    .phone{ height:min(860px,92dvh); border-radius:44px; border:10px solid rgba(5,32,30,.85); box-shadow:0 30px 60px -20px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08) inset; }
+  }
+
+  header.appbar{
+    padding:calc(16px + var(--safe-t)) 18px 14px;
+    background: linear-gradient(160deg, rgba(20,92,86,.88) 0%, rgba(14,67,63,.9) 100%);
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+    border-bottom:1px solid rgba(255,255,255,.18);
+    color:var(--on-accent); position:relative; flex-shrink:0;
+  }
+  .appbar-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; position:relative; z-index:1; }
+  .appbar-title-wrap{ display:flex; align-items:center; gap:9px; min-width:0; }
+  .appbar-logo{ width:30px; height:30px; border-radius:9px; background:var(--amber); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .appbar-title{ font-family:var(--font-display); font-weight:800; font-size:19px; letter-spacing:-.01em; }
+  .appbar-sub{ font-size:11.5px; color:var(--on-accent); opacity:.8; margin-top:2px; }
+  .appbar-right{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .icon-btn{ width:32px; height:32px; border-radius:50%; background:rgba(251,246,236,.14); border:1px solid rgba(251,246,236,.25); color:var(--on-accent); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+  .icon-btn svg{ width:15px; height:15px; }
+  .lang-select{
+    appearance:none; -webkit-appearance:none;
+    background:rgba(251,246,236,.14); color:var(--on-accent);
+    border:1px solid rgba(251,246,236,.3); border-radius:100px;
+    font-size:11px; padding:6px 9px; cursor:pointer; outline:none;
+  }
+  .lang-select option{ color:#0B2E2C; }
+  .pro-btn{
+    display:flex; align-items:center; gap:4px;
+    background:linear-gradient(135deg, var(--amber), var(--amber-dark));
+    color:#2A1D06; border:none; border-radius:100px;
+    font-family:var(--font-display); font-weight:700; font-size:10px;
+    padding:6px 9px; cursor:pointer; flex-shrink:0;
+  }
+  .pro-btn svg{ width:11px; height:11px; }
+
+  main{ flex:1; overflow-y:auto; padding:16px 18px 14px; -webkit-overflow-scrolling:touch; }
+  main::-webkit-scrollbar{ display:none; }
+
+  .screen{ display:none; animation: fade .22s ease; }
+  .screen.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .ring-card{ background:linear-gradient(135deg, rgba(20,92,86,.92), rgba(14,67,63,.88)); backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%); border:1px solid rgba(255,255,255,.2); box-shadow:0 12px 32px -16px rgba(11,46,44,.35); border-radius:24px; padding:20px; color:var(--on-accent); position:relative; overflow:hidden; margin-bottom:14px; }
+  .ring-card svg.motif{ position:absolute; top:-30px; inset-inline-start:-30px; opacity:.08; }
+  .ring-wrap{ display:flex; align-items:center; gap:16px; position:relative; z-index:1; }
+  .ring-figure{ position:relative; width:104px; height:104px; flex-shrink:0; }
+  .ring-figure svg{ transform:rotate(-90deg); }
+  .ring-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring-pct{ font-weight:700; font-size:20px; }
+  .ring-pct-label{ font-size:9.5px; opacity:.75; margin-top:1px; text-align:center; }
+  .ring-info-title{ font-size:12px; opacity:.85; }
+  .ring-info-amount{ font-weight:700; font-size:18px; margin-top:4px; }
+  .ring-info-goal{ font-size:11px; opacity:.7; margin-top:6px; line-height:1.5; }
+  .ring-edit{ margin-top:8px; background:rgba(251,246,236,.16); border:none; color:var(--on-accent); font-size:10.5px; padding:5px 10px; border-radius:100px; cursor:pointer; }
+
+  .stat-row{ display:flex; gap:10px; margin-bottom:14px; }
+  .stat-box{ flex:1; background:rgba(255,255,255,.55); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.6); box-shadow:0 8px 20px -14px rgba(11,46,44,.25); border-radius:16px; padding:12px 13px; }
+  html.dark .stat-box{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.14); }
+  .stat-box .lbl{ font-size:11px; color:var(--ink-soft); }
+  .stat-box .val{ font-weight:700; font-size:17px; color:var(--text-accent); margin-top:4px; }
+  .stat-box .val.neg{ color:var(--terracotta); }
+
+  .section-title{ font-family:var(--font-display); font-weight:700; font-size:14px; color:var(--text-accent); margin:4px 0 10px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .section-title span.hint{ font-family:var(--font-body); font-weight:400; font-size:11px; color:var(--ink-soft); }
+  .filter-btn{ display:flex; align-items:center; gap:5px; background:var(--sand); border:1px solid var(--border); border-radius:100px; padding:5px 10px; font-size:10.5px; color:var(--ink); cursor:pointer; }
+  .filter-btn svg{ width:11px; height:11px; }
+
+  .search-bar{ display:none; gap:8px; margin-bottom:10px; }
+  .search-bar.show{ display:flex; }
+  .search-bar input{ flex:1; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.6); backdrop-filter:blur(10px); border-radius:12px; padding:9px 12px; font-size:12.5px; color:var(--ink); outline:none; }
+  .search-bar select{ border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.6); backdrop-filter:blur(10px); border-radius:12px; padding:9px 8px; font-size:11.5px; color:var(--ink); outline:none; }
+
+  .tx-item{ display:flex; align-items:center; gap:11px; padding:10px 4px; border-bottom:1px solid var(--border); }
+  .tx-item:last-child{ border-bottom:none; }
+  .tx-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .tx-body{ flex:1; min-width:0; }
+  .tx-cat{ font-size:13px; color:var(--text-accent); font-weight:600; }
+  .tx-note{ font-size:10.5px; color:var(--ink-soft); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tx-date{ font-size:9.5px; color:var(--ink-soft); opacity:.75; margin-top:1px; }
+  .tx-amount{ font-weight:600; font-size:13.5px; color:var(--terracotta); }
+  .tx-del{ width:22px; height:22px; border-radius:50%; border:none; background:transparent; color:var(--ink-soft); font-size:15px; cursor:pointer; flex-shrink:0; }
+  .tx-del:hover{ background:var(--border); }
+
+  .empty{ text-align:center; padding:26px 10px; color:var(--ink-soft); }
+  .empty svg{ opacity:.4; margin-bottom:8px; }
+  .empty p{ font-size:12.5px; }
+
+  .field-label{ font-size:12px; color:var(--ink-soft); margin-bottom:7px; display:block; font-weight:500; }
+  .amount-input-wrap{ background:rgba(255,255,255,.6); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.45); border-radius:18px; padding:16px; display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+  .amount-input-wrap input{ border:none; background:transparent; outline:none; width:100%; font-family:'Space Grotesk',sans-serif; font-size:28px; font-weight:700; color:var(--ink); text-align:center; }
+  .amount-input-wrap .cur{ font-size:13px; color:var(--ink-soft); font-weight:500; }
+
+  .chip-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .chip{ padding:8px 13px; border-radius:100px; border:1px solid rgba(255,255,255,.5); background:rgba(255,255,255,.55); backdrop-filter:blur(8px); font-size:12.5px; color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:6px; transition:.15s; }
+  .chip .dot{ width:8px; height:8px; border-radius:50%; }
+  .chip.selected{ border-color:transparent; color:#fff; }
+
+  .text-input, .date-input{ width:100%; border:1px solid rgba(255,255,255,.5); background:rgba(255,255,255,.6); backdrop-filter:blur(10px); border-radius:14px; padding:11px 13px; font-size:13px; color:var(--ink); outline:none; margin-bottom:16px; }
+  .text-input:focus, .date-input:focus{ border-color:var(--teal-light); }
+  .row-2{ display:flex; gap:10px; }
+  .row-2 > *{ flex:1; }
+
+  .btn-primary{ width:100%; border:none; border-radius:16px; padding:14px; cursor:pointer; background:var(--amber); color:#2A1D06; font-family:var(--font-display); font-weight:700; font-size:14px; transition:.15s; }
+  .btn-primary:active{ transform:scale(.98); }
+  .btn-primary:disabled{ opacity:.4; cursor:not-allowed; }
+  .btn-secondary{ width:100%; border:1.5px solid var(--border); border-radius:16px; padding:12px; cursor:pointer; background:var(--cream); color:var(--ink); font-family:var(--font-display); font-weight:700; font-size:13px; margin-top:8px; }
+
+  .bar-row{ margin-bottom:13px; }
+  .bar-row .top{ display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px; }
+  .bar-row .top .catname{ color:var(--ink); font-weight:500; }
+  .bar-row .top .catval{ color:var(--ink-soft); font-weight:600; }
+  .bar-track{ height:9px; background:var(--sand); border-radius:100px; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:100px; transition:width .4s ease; }
+
+  .total-card{ background:#0B2E2C; color:#FBF6EC; border-radius:18px; padding:16px 18px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+  .total-card .lbl{ font-size:11.5px; opacity:.75; }
+  .total-card .val{ font-weight:700; font-size:20px; margin-top:3px; }
+
+  .seg{ display:flex; background:var(--sand); border-radius:100px; padding:3px; margin-bottom:16px; }
+  .seg button{ flex:1; border:none; background:transparent; padding:8px 6px; border-radius:100px; font-size:11.5px; color:var(--ink-soft); cursor:pointer; font-weight:600; }
+  .seg button.active{ background:var(--teal); color:var(--on-accent); }
+
+  .compare-card{ display:flex; gap:10px; margin-bottom:16px; }
+  .compare-box{ flex:1; background:var(--sand); border-radius:16px; padding:12px; text-align:center; }
+  .compare-box .m{ font-size:10.5px; color:var(--ink-soft); }
+  .compare-box .v{ font-weight:700; font-size:16px; margin-top:4px; color:var(--ink); }
+  .compare-diff{ text-align:center; font-size:11.5px; margin-top:8px; font-weight:600; }
+  .compare-diff.up{ color:var(--terracotta); }
+  .compare-diff.down{ color:var(--teal-light); }
+
+  .goal-form-card{ background:rgba(255,255,255,.55); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.6); box-shadow:0 8px 24px -16px rgba(11,46,44,.3); border-radius:20px; padding:16px; margin-bottom:14px; }
+  .goal-input-row{ margin-bottom:14px; }
+  .goal-input-row:last-child{ margin-bottom:0; }
+  .goal-input-row label{ font-size:12px; color:var(--ink-soft); font-weight:500; display:block; margin-bottom:6px; }
+  .goal-input-row .inp{ display:flex; align-items:center; gap:8px; background:var(--cream); border-radius:12px; padding:10px 13px; border:1.5px solid var(--border); }
+  .goal-input-row .inp input{ border:none; background:transparent; outline:none; width:100%; font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; color:var(--ink); }
+  .goal-input-row .inp span{ font-size:11.5px; color:var(--ink-soft); }
+
+  .toast{ position:absolute; bottom:calc(90px + var(--safe-b)); left:50%; transform:translateX(-50%) translateY(20px); background:#0B2E2C; color:#FBF6EC; padding:10px 18px; border-radius:100px; font-size:12.5px; opacity:0; pointer-events:none; transition:.25s; z-index:50; max-width:88%; text-align:center; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.warn{ background:var(--terracotta); }
+
+  .tabbar{ flex-shrink:0; display:flex; align-items:center; justify-content:space-around; background:rgba(251,246,236,.82); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border-top:1px solid rgba(255,255,255,.4); padding:9px 6px calc(12px + var(--safe-b)); position:relative; }
+  html.dark .tabbar{ background:rgba(8,22,20,.85); border-top-color:rgba(255,255,255,.08); }
+  .tab-btn{ background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--ink-soft); font-size:9.5px; width:60px; padding:4px 0; }
+  .tab-btn.active{ color:var(--teal); }
+  .tab-btn svg{ width:19px; height:19px; }
+  .tab-fab{ width:50px; height:50px; border-radius:50%; background:var(--amber); color:#2A1D06; display:flex; align-items:center; justify-content:center; margin-top:-28px; box-shadow:0 8px 18px -6px rgba(212,162,76,.7); border:4px solid var(--on-accent); cursor:pointer; }
+  .tab-fab svg{ width:20px; height:20px; }
+
+  .sub-header{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .back-btn{ width:32px; height:32px; border-radius:50%; border:1.5px solid var(--border); background:var(--cream); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; color:var(--ink); }
+  .sub-title{ font-family:var(--font-display); font-weight:800; font-size:16px; color:var(--text-accent); }
+  [dir="rtl"] .back-btn svg{ transform:scaleX(-1); }
+
+  .feature-card{ position:relative; background:rgba(255,255,255,.55); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.4); box-shadow:0 8px 24px -16px rgba(11,46,44,.25); border-radius:20px; padding:15px; margin-bottom:12px; overflow:hidden; }
+  .feature-head{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .feature-title-row{ display:flex; align-items:center; gap:8px; flex:1; }
+  .feature-icon{ width:28px; height:28px; border-radius:9px; background:var(--teal); color:var(--on-accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .feature-icon svg{ width:15px; height:15px; }
+  .feature-title{ font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--ink); }
+  .feature-sub{ font-size:10.5px; color:var(--ink-soft); margin-top:1px; }
+  .toggle{ width:38px; height:22px; border-radius:100px; background:var(--border); position:relative; cursor:pointer; flex-shrink:0; transition:.15s; }
+  .toggle.on{ background:var(--teal); }
+  .toggle .knob{ position:absolute; top:2px; inset-inline-start:2px; width:18px; height:18px; border-radius:50%; background:#fff; transition:.15s; }
+  .toggle.on .knob{ inset-inline-start:18px; }
+
+  .plan-card{ position:relative; border-radius:20px; padding:16px; margin-bottom:12px; cursor:pointer; border:1px solid rgba(255,255,255,.5); background:rgba(255,255,255,.55); backdrop-filter:blur(14px); transition:.15s; }
+  html.dark .plan-card{ background:rgba(255,255,255,.06); }
+  .plan-card.recommended{ border-color:var(--amber); }
+  .plan-card.current{ border-color:var(--teal); background:var(--teal-pale); }
+  .plan-badge{ position:absolute; top:-10px; inset-inline-end:16px; background:var(--amber); color:#2A1D06; font-family:var(--font-display); font-weight:700; font-size:9.5px; padding:4px 10px; border-radius:100px; }
+  .plan-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px; }
+  .plan-name{ font-family:var(--font-display); font-weight:800; font-size:14px; color:var(--text-accent); }
+  .plan-price{ font-weight:700; font-size:18px; color:var(--ink); }
+  .plan-price span{ font-family:var(--font-body); font-weight:500; font-size:11px; color:var(--ink-soft); }
+  .plan-features{ margin-top:10px; display:flex; flex-direction:column; gap:7px; }
+  .plan-feature{ display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--ink-soft); }
+  .plan-feature svg{ width:13px; height:13px; color:var(--teal-light); flex-shrink:0; }
+  .plan-select-btn{ width:100%; margin-top:12px; border:none; border-radius:12px; padding:10px; font-family:var(--font-display); font-weight:700; font-size:12.5px; cursor:pointer; background:var(--teal); color:var(--on-accent); }
+  .plan-card.recommended .plan-select-btn{ background:var(--amber); color:#2A1D06; }
+  .plan-card.current .plan-select-btn{ background:var(--border); color:var(--ink-soft); cursor:default; }
+  .swatch-row{ display:flex; gap:14px; flex-wrap:wrap; margin-top:6px; }
+  .swatch{ display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer; }
+  .swatch-dot{ width:36px; height:36px; border-radius:50%; border:3px solid transparent; display:flex; align-items:center; justify-content:center; }
+  .swatch-dot.active{ border-color:var(--ink); }
+  .swatch-dot svg{ width:14px; height:14px; color:#fff; }
+  .swatch-label{ font-size:9.5px; color:var(--ink-soft); }
+  .pro-locked{ position:relative; }
+  .pro-locked .lock-overlay{ position:absolute; inset:0; background:rgba(251,246,236,.88); backdrop-filter:blur(2px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; border-radius:16px; text-align:center; padding:12px; z-index:2; }
+  html.dark .pro-locked .lock-overlay{ background:rgba(14,38,36,.9); }
+  .lock-overlay svg{ width:20px; height:20px; color:var(--ink-soft); }
+  .lock-overlay p{ font-size:11px; color:var(--ink-soft); max-width:210px; }
+  .lock-upgrade-btn{ border:none; background:var(--amber); color:#2A1D06; font-family:var(--font-display); font-weight:700; font-size:11px; padding:7px 15px; border-radius:100px; cursor:pointer; }
+  .pro-banner{ background:linear-gradient(135deg, rgba(20,92,86,.92), rgba(14,67,63,.88)); border-radius:18px; padding:14px 16px; color:var(--on-accent); display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .pro-banner svg{ width:22px; height:22px; flex-shrink:0; }
+  .pro-banner .pt{ font-family:var(--font-display); font-weight:700; font-size:12.5px; }
+  .pro-banner .ps{ font-size:10.5px; opacity:.8; margin-top:1px; }
+  .num-accent{ color:var(--text-accent); }
+  .goal-tag{ display:inline-block; background:var(--teal-pale); color:var(--teal); font-size:10.5px; font-weight:600; padding:5px 10px; border-radius:100px; margin-bottom:8px; }
+  .goal-item{ background:var(--cream); border:1.5px solid var(--border); border-radius:14px; padding:12px; margin-bottom:10px; }
+  .goal-item .gt{ font-size:12.5px; font-weight:600; color:var(--text-accent); }
+  .goal-item .gd{ font-size:10.5px; color:var(--ink-soft); margin-top:2px; }
+  .goal-item .bar-track{ margin-top:8px; }
+  .goal-del{ float:inset-inline-end; }
+  .goal-item-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <header class="appbar">
+    <div class="appbar-row">
+      <div class="appbar-title-wrap">
+        <div class="appbar-logo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h11" stroke="#2A1D06" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="appbar-title">SpendWise</div>
+          <div class="appbar-sub" id="appbarSub">تتبّع مصاريفك بذكاء</div>
+        </div>
+      </div>
+      <div class="appbar-right">
+        <select class="lang-select" id="langSelect" onchange="setLang(this.value)">
+          <option value="ar">AR</option>
+          <option value="en">EN</option>
+        </select>
+        <button class="icon-btn" onclick="toggleDark()" id="darkBtn" title="Dark mode">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="pro-btn" id="proHeaderBtn" onclick="go('pro')">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.6 6.6L21 9l-5 4.5 1.4 7-5.4-3.4L6.6 20.5 8 13.5 3 9l6.4-.4z" fill="#2A1D06"/></svg>
+          <span id="proBtnLabel">Pro</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HOME -->
+    <section class="screen active" id="screen-home">
+      <div class="ring-card">
+        <svg class="motif" width="160" height="160" viewBox="0 0 160 160"><circle cx="80" cy="80" r="70" stroke="#fff" stroke-width="10"/></svg>
+        <div class="ring-wrap">
+          <div class="ring-figure">
+            <svg width="104" height="104" viewBox="0 0 104 104">
+              <circle cx="52" cy="52" r="44" stroke="rgba(255,255,255,.2)" stroke-width="11" fill="none"/>
+              <circle id="ringProgress" cx="52" cy="52" r="44" stroke="#D4A24C" stroke-width="11" fill="none" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="276.5"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-pct num" id="ringPct" style="color:var(--on-accent)">0%</div>
+              <div class="ring-pct-label" data-i18n="usedOfBudget">مستخدَم</div>
+            </div>
+          </div>
+          <div>
+            <div class="ring-info-title" data-i18n="spentThisMonth">مصروف هذا الشهر</div>
+            <div class="ring-info-amount num" id="spentAmount">$0</div>
+            <div class="ring-info-goal" id="ringGoalText">لم تحدد ميزانية بعد</div>
+            <button class="ring-edit" onclick="go('budget')" data-i18n="editBudget">تعديل الميزانية</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="lbl" data-i18n="income">الدخل</div>
+          <div class="val num num-accent" id="homeIncome">$0</div>
+        </div>
+        <div class="stat-box">
+          <div class="lbl" data-i18n="expenses">المصاريف</div>
+          <div class="val neg num" id="homeExpense">$0</div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <span data-i18n="recentTx">آخر العمليات</span>
+        <span class="hint" style="cursor:pointer;color:var(--teal);font-weight:600" onclick="go('transactions')" data-i18n="seeAll">عرض الكل</span>
+      </div>
+      <div id="recentTxList"></div>
+    </section>
+
+    <!-- TRANSACTIONS -->
+    <section class="screen" id="screen-transactions">
+      <div class="sub-header">
+        <button class="back-btn" onclick="go('home')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="sub-title" data-i18n="allTx">كل العمليات</div>
+        <div style="flex:1"></div>
+        <button class="filter-btn" onclick="toggleSearch()">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span data-i18n="search">بحث</span>
+        </button>
+      </div>
+      <div class="search-bar" id="searchBar">
+        <input type="text" id="searchInput" placeholder="ابحث..." oninput="renderTxList()">
+        <select id="filterCat" onchange="renderTxList()"></select>
+      </div>
+      <div id="fullTxList"></div>
+    </section>
+
+    <!-- ADD -->
+    <section class="screen" id="screen-add">
+      <div class="sub-header">
+        <button class="back-btn" onclick="go('home')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="sub-title" data-i18n="addTx">إضافة عملية</div>
+      </div>
+
+      <div class="seg" id="typeSeg">
+        <button class="active" data-type="expense" onclick="setTxType('expense')" data-i18n="expense">مصروف</button>
+        <button data-type="income" onclick="setTxType('income')" data-i18n="income2">دخل</button>
+      </div>
+
+      <span class="field-label" data-i18n="amount">المبلغ</span>
+      <div class="amount-input-wrap">
+        <span class="cur">$</span>
+        <input type="number" id="amountInput" placeholder="0.00" inputmode="decimal">
+      </div>
+
+      <span class="field-label" data-i18n="category">الفئة</span>
+      <div class="chip-grid" id="categoryChips"></div>
+
+      <span class="field-label" data-i18n="note">ملاحظة (اختياري)</span>
+      <input type="text" class="text-input" id="noteInput" placeholder="مثال: قهوة مع صديق">
+
+      <span class="field-label" data-i18n="date">التاريخ</span>
+      <input type="date" class="date-input" id="dateInput">
+
+      <button class="btn-primary" onclick="saveTransaction()" data-i18n="save">حفظ العملية</button>
+    </section>
+
+    <!-- STATS -->
+    <section class="screen" id="screen-stats">
+      <div class="sub-header">
+        <button class="back-btn" onclick="go('home')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="sub-title" data-i18n="statsTitle">الإحصائيات</div>
+      </div>
+
+      <div class="total-card">
+        <div>
+          <div class="lbl" data-i18n="totalSpentMonth">إجمالي المصروف هذا الشهر</div>
+          <div class="val num" id="statsTotalSpent">$0</div>
+        </div>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" opacity=".6"><path d="M3 17l6-6 4 4 8-8" stroke="#FBF6EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <div class="section-title" data-i18n="byCategory">حسب الفئة</div>
+      <div id="statsBars"></div>
+
+      <div class="section-title" style="margin-top:18px" data-i18n="vsLastMonth">مقارنة بالشهر الماضي</div>
+      <div class="compare-card">
+        <div class="compare-box">
+          <div class="m" data-i18n="lastMonth">الشهر الماضي</div>
+          <div class="v num" id="cmpLast">$0</div>
+        </div>
+        <div class="compare-box">
+          <div class="m" data-i18n="thisMonth">هذا الشهر</div>
+          <div class="v num" id="cmpThis">$0</div>
+        </div>
+      </div>
+      <div class="compare-diff" id="cmpDiff"></div>
+
+      <div class="feature-card pro-locked" id="pieCard" style="margin-top:18px;padding-top:16px">
+        <div class="section-title" style="margin-top:0" data-i18n="pieTitle">توزيع المصاريف (دائري)</div>
+        <div style="display:flex;align-items:center;gap:16px;justify-content:center;flex-wrap:wrap">
+          <svg id="pieChart" width="140" height="140" viewBox="0 0 140 140"></svg>
+          <div id="pieLegend" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+        <div class="lock-overlay" id="pieLock">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+          <p data-i18n="lockPie">خاصية Pro — اشترك لعرض المبيان الدائري</p>
+          <button class="lock-upgrade-btn" onclick="go('pro')" data-i18n="upgrade">الترقية إلى Pro</button>
+        </div>
+      </div>
+
+      <div class="feature-card pro-locked" id="multiMonthCard" style="padding-top:16px">
+        <div class="section-title" style="margin-top:0" data-i18n="sixMonthTitle">مقارنة آخر 6 أشهر</div>
+        <div id="multiMonthBars"></div>
+        <div class="lock-overlay" id="multiMonthLock">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+          <p data-i18n="lockMultiMonth">خاصية Pro — اشترك لعرض مقارنة الأشهر المتقدمة</p>
+          <button class="lock-upgrade-btn" onclick="go('pro')" data-i18n="upgrade">الترقية إلى Pro</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUDGET (edit) -->
+    <section class="screen" id="screen-budget">
+      <div class="sub-header">
+        <button class="back-btn" onclick="go('home')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="sub-title" data-i18n="editBudget">تعديل الميزانية</div>
+      </div>
+      <div class="goal-form-card">
+        <div class="goal-input-row">
+          <label data-i18n="monthlyBudget">الميزانية الشهرية</label>
+          <div class="inp"><input type="number" id="budgetInput" placeholder="3000"><span>$</span></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveBudget()" data-i18n="save">حفظ</button>
+    </section>
+
+    <!-- GOALS -->
+    <section class="screen" id="screen-goals">
+      <div class="sub-header">
+        <button class="back-btn" onclick="go('home')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="sub-title" data-i18n="goalsTitle">أهداف الادخار</div>
+      </div>
+
+      <div class="goal-form-card">
+        <span class="goal-tag" data-i18n="newGoal">هدف جديد</span>
+        <div class="goal-input-row">
+          <label data-i18n="goalName">اسم الهدف</label>
+          <div class="inp"><input type="text" id="goalName" placeholder="مثال: رحلة، سيارة..."></div>
+        </div>
+        <div class="row-2">
+          <div class="goal-input-row">
+            <label data-i18n="targetAmount">المبلغ المستهدف</label>
+            <div class="inp"><input type="number" id="goalTarget" placeholder="5000"><span>$</span></div>
+          </div>
+          <div class="goal-input-row">
+            <label data-i18n="savedSoFar">المدخر حاليًا</label>
+            <div class="inp"><input type="number" id="goalSaved" placeholder="0"><span>$</span></div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="addGoal()" data-i18n="addGoalBtn">إضافة الهدف</button>
+      </div>
+
+      <div class="section-title" data-i18n="yourGoals">أهدافك</div>
+      <div id="goalsList"></div>
+    </section>
+
+    <!-- PRO -->
+    <section class="screen" id="screen-pro">
+      <div class="sub-header">
+        <button class="back-btn" onclick="go('home')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="sub-title" data-i18n="proTitle">SpendWise Pro</div>
+      </div>
+
+      <div id="proActiveBanner" style="display:none" class="pro-banner">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.6 6.6L21 9l-5 4.5 1.4 7-5.4-3.4L6.6 20.5 8 13.5 3 9l6.4-.4z" fill="#D4A24C"/></svg>
+        <div>
+          <div class="pt" data-i18n="proActive">اشتراكك فعّال</div>
+          <div class="ps" id="proActiveSub"></div>
+        </div>
+      </div>
+
+      <div class="section-title" data-i18n="proFeaturesTitle">ماذا تحصل عليه؟</div>
+      <div class="plan-features" style="margin-bottom:16px">
+        <div class="plan-feature"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="featColors">تغيير لون التطبيق (أزرق، بنفسجي، أخضر فاتح)</span></div>
+        <div class="plan-feature"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="featTextColor">تخصيص لون الأرقام والنصوص</span></div>
+        <div class="plan-feature"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="featCompare">مقارنة متقدمة بين الأشهر</span></div>
+        <div class="plan-feature"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="featPie">مبيان دائري للمصاريف</span></div>
+        <div class="plan-feature"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="featAlerts">تنبيهات إشعارات عند اقتراب حد الميزانية</span></div>
+      </div>
+
+      <div class="section-title" data-i18n="choosePlan">اختر خطتك</div>
+
+      <div class="plan-card" id="planCard6" onclick="selectPlan('m6')">
+        <div class="plan-badge" data-i18n="popular">الأكثر شيوعًا</div>
+        <div class="plan-top">
+          <div class="plan-name" data-i18n="plan6Name">٦ أشهر</div>
+          <div class="plan-price num">$10<span> / 6mo</span></div>
+        </div>
+        <div class="ps" style="font-size:11px;color:var(--ink-soft)" data-i18n="plan6Desc">أقل من $1.7 شهريًا</div>
+        <button class="plan-select-btn" id="plan6Btn" onclick="event.stopPropagation();subscribePlan('m6')" data-i18n="chooseThis">اختر هذه الخطة</button>
+      </div>
+
+      <div class="plan-card recommended" id="planCard12" onclick="selectPlan('m12')">
+        <div class="plan-badge" data-i18n="bestValue">أفضل قيمة</div>
+        <div class="plan-top">
+          <div class="plan-name" data-i18n="plan12Name">١٢ شهرًا</div>
+          <div class="plan-price num">$20<span> / 12mo</span></div>
+        </div>
+        <div class="ps" style="font-size:11px;color:var(--ink-soft)" data-i18n="plan12Desc">أقل من $1.7 شهريًا، سنة كاملة</div>
+        <button class="plan-select-btn" id="plan12Btn" onclick="event.stopPropagation();subscribePlan('m12')" data-i18n="chooseThis">اختر هذه الخطة</button>
+      </div>
+
+      <button class="btn-secondary" id="cancelProBtn" style="display:none" onclick="cancelPro()" data-i18n="cancelPro">إلغاء الاشتراك</button>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="screen" id="screen-settings">
+      <div class="sub-header">
+        <button class="back-btn" onclick="go('home')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="sub-title" data-i18n="settingsTitle">الإعدادات</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-head">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" stroke="#FBF6EC" stroke-width="2" stroke-linejoin="round"/></svg></div>
+          <div class="feature-title-row">
+            <div>
+              <div class="feature-title" data-i18n="darkMode">الوضع الليلي</div>
+              <div class="feature-sub" data-i18n="darkModeSub">مريح للعين مساءً</div>
+            </div>
+          </div>
+          <div class="toggle" id="darkToggle" onclick="toggleDark()"><div class="knob"></div></div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-head">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16M4 12h16M4 19h10" stroke="#FBF6EC" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="feature-title-row">
+            <div>
+              <div class="feature-title" data-i18n="language">اللغة</div>
+              <div class="feature-sub" id="langSub">العربية</div>
+            </div>
+          </div>
+        </div>
+        <div class="chip-grid" style="margin-bottom:0">
+          <div class="chip" id="chipAr" onclick="setLang('ar')">العربية</div>
+          <div class="chip" id="chipEn" onclick="setLang('en')">English</div>
+        </div>
+      </div>
+
+      <div class="feature-card pro-locked" id="appearanceCard">
+        <div class="feature-head">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#FBF6EC" stroke-width="2"/><path d="M12 3a9 9 0 000 18 3 3 0 003-3 2 2 0 012-2h1a2 2 0 002-2 9 9 0 00-8-11z" fill="#FBF6EC" opacity=".5"/></svg></div>
+          <div class="feature-title-row">
+            <div>
+              <div class="feature-title" data-i18n="appColor">لون التطبيق</div>
+              <div class="feature-sub" data-i18n="appColorSub">اختر هوية لونية فاتحة</div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-row">
+          <div class="swatch" onclick="setAccentColor('default')">
+            <div class="swatch-dot active" id="swatchDefault" style="background:#D4A24C"></div>
+            <span class="swatch-label" data-i18n="colorDefault">الأصلي</span>
+          </div>
+          <div class="swatch" onclick="setAccentColor('blue')">
+            <div class="swatch-dot" id="swatchBlue" style="background:#8FB8E0"></div>
+            <span class="swatch-label" data-i18n="colorBlue">أزرق فاتح</span>
+          </div>
+          <div class="swatch" onclick="setAccentColor('purple')">
+            <div class="swatch-dot" id="swatchPurple" style="background:#B39DDB"></div>
+            <span class="swatch-label" data-i18n="colorPurple">بنفسجي فاتح</span>
+          </div>
+          <div class="swatch" onclick="setAccentColor('green')">
+            <div class="swatch-dot" id="swatchGreen" style="background:#93C6A6"></div>
+            <span class="swatch-label" data-i18n="colorGreen">أخضر فاتح</span>
+          </div>
+        </div>
+        <div class="lock-overlay" id="appearanceLock">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+          <p data-i18n="lockAppearance">خاصية Pro — اشترك لتغيير لون التطبيق</p>
+          <button class="lock-upgrade-btn" onclick="go('pro')" data-i18n="upgrade">الترقية إلى Pro</button>
+        </div>
+      </div>
+
+      <div class="feature-card pro-locked" id="textColorCard">
+        <div class="feature-head">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20h14M8 16l4-11 4 11M9.5 12h5" stroke="#FBF6EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="feature-title-row">
+            <div>
+              <div class="feature-title" data-i18n="textColor">لون النصوص والأرقام</div>
+              <div class="feature-sub" data-i18n="textColorSub">خصص لون الأرقام في التطبيق</div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-row">
+          <div class="swatch" onclick="setTextColor('default')">
+            <div class="swatch-dot active" id="tswatchDefault" style="background:#0B2E2C"></div>
+            <span class="swatch-label" data-i18n="colorDefault">الأصلي</span>
+          </div>
+          <div class="swatch" onclick="setTextColor('blue')">
+            <div class="swatch-dot" id="tswatchBlue" style="background:#0001FB"></div>
+            <span class="swatch-label" data-i18n="colorBlue">أزرق فاتح</span>
+          </div>
+          <div class="swatch" onclick="setTextColor('purple')">
+            <div class="swatch-dot" id="tswatchPurple" style="background:#CA11F6"></div>
+            <span class="swatch-label" data-i18n="colorPurple">بنفسجي فاتح</span>
+          </div>
+          <div class="swatch" onclick="setTextColor('green')">
+            <div class="swatch-dot" id="tswatchGreen" style="background:#00D64A"></div>
+            <span class="swatch-label" data-i18n="colorGreen">أخضر فاتح</span>
+          </div>
+        </div>
+        <div class="lock-overlay" id="textColorLock">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+          <p data-i18n="lockTextColor">خاصية Pro — اشترك لتخصيص لون النصوص</p>
+          <button class="lock-upgrade-btn" onclick="go('pro')" data-i18n="upgrade">الترقية إلى Pro</button>
+        </div>
+      </div>
+
+      <div class="feature-card pro-locked" id="alertsCard">
+        <div class="feature-head">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 22a2.5 2.5 0 002.5-2.5h-5A2.5 2.5 0 0012 22zM18 16v-5a6 6 0 10-12 0v5l-2 2v1h16v-1l-2-2z" fill="#FBF6EC"/></svg></div>
+          <div class="feature-title-row">
+            <div>
+              <div class="feature-title" data-i18n="budgetAlerts">تنبيهات الميزانية</div>
+              <div class="feature-sub" data-i18n="budgetAlertsSub">إشعار عند اقتراب حد الميزانية</div>
+            </div>
+          </div>
+          <div class="toggle" id="alertsToggle" onclick="toggleAlerts()"><div class="knob"></div></div>
+        </div>
+        <div class="lock-overlay" id="alertsLock">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+          <p data-i18n="lockAlerts">خاصية Pro — اشترك لتفعيل التنبيهات</p>
+          <button class="lock-upgrade-btn" onclick="go('pro')" data-i18n="upgrade">الترقية إلى Pro</button>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-head">
+          <div class="feature-icon" style="background:var(--terracotta)"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0v12a1 1 0 001 1h8a1 1 0 001-1V7" stroke="#FBF6EC" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="feature-title-row">
+            <div>
+              <div class="feature-title" data-i18n="resetData">حذف كل البيانات</div>
+              <div class="feature-sub" data-i18n="resetSub">لا يمكن التراجع عن هذا</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-secondary" onclick="resetData()" data-i18n="resetBtn">إعادة تعيين</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <nav class="tabbar">
+    <button class="tab-btn active" data-tab="home" onclick="go('home')">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span data-i18n="tabHome">الرئيسية</span>
+    </button>
+    <button class="tab-btn" data-tab="stats" onclick="go('stats')">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10M12 20V4M20 20v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span data-i18n="tabStats">إحصائيات</span>
+    </button>
+    <button class="tab-fab" onclick="go('add')">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#2A1D06" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </button>
+    <button class="tab-btn" data-tab="goals" onclick="go('goals')">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2"/></svg>
+      <span data-i18n="tabGoals">الأهداف</span>
+    </button>
+    <button class="tab-btn" data-tab="settings" onclick="go('settings')">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 00.33 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.33 1.7 1.7 0 00-1 1.55V21a2 2 0 11-4 0v-.09a1.7 1.7 0 00-1-1.55 1.7 1.7 0 00-1.87.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.7 1.7 0 00.33-1.87 1.7 1.7 0 00-1.55-1H3a2 2 0 110-4h.09a1.7 1.7 0 001.55-1 1.7 1.7 0 00-.33-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06a1.7 1.7 0 001.87.33H9a1.7 1.7 0 001-1.55V3a2 2 0 114 0v.09a1.7 1.7 0 001 1.55 1.7 1.7 0 001.87-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.7 1.7 0 00-.33 1.87V9a1.7 1.7 0 001.55 1H21a2 2 0 110 4h-.09a1.7 1.7 0 00-1.55 1z" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span data-i18n="tabSettings">الإعدادات</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+// ---------- State (in-memory only) ----------
+const CATEGORIES = [
+  { id:'food', ar:'طعام', en:'Food', color:'#C1512E' },
+  { id:'transport', ar:'مواصلات', en:'Transport', color:'#2C8C82' },
+  { id:'shopping', ar:'تسوق', en:'Shopping', color:'#D4A24C' },
+  { id:'bills', ar:'فواتير', en:'Bills', color:'#145C56' },
+  { id:'health', ar:'صحة', en:'Health', color:'#8B5CF6' },
+  { id:'fun', ar:'ترفيه', en:'Fun', color:'#E88A3C' },
+  { id:'other', ar:'أخرى', en:'Other', color:'#4B615F' },
+];
+
+let state = {
+  lang: 'ar',
+  dark: false,
+  budget: 3000,
+  transactions: [],
+  goals: [],
+  isPro: false,
+  proPlan: null,
+  accentColor: 'default',
+  textColor: 'default',
+  alertsEnabled: false,
+};
+
+const ACCENT_COLORS = { blue:{main:'#8FB8E0',dark:'#6FA0CC',shadow:'rgba(143,184,224,.65)'}, purple:{main:'#B39DDB',dark:'#9575CD',shadow:'rgba(179,157,219,.65)'}, green:{main:'#93C6A6',dark:'#74AD8A',shadow:'rgba(147,198,166,.65)'}, default:{main:'#D4A24C',dark:'#B5822E',shadow:'rgba(212,162,76,.7)'} };
+const TEXT_COLORS = { blue:'#0001FB', purple:'#CA11F6', green:'#00D64A', default:'var(--ink)' };
+
+const I18N = {
+  ar: {
+    appbarSub:'تتبّع مصاريفك بذكاء', usedOfBudget:'مستخدَم', spentThisMonth:'مصروف هذا الشهر', editBudget:'تعديل الميزانية',
+    income:'الدخل', expenses:'المصاريف', recentTx:'آخر العمليات', seeAll:'عرض الكل', allTx:'كل العمليات', search:'بحث',
+    addTx:'إضافة عملية', expense:'مصروف', income2:'دخل', amount:'المبلغ', category:'الفئة', note:'ملاحظة (اختياري)',
+    date:'التاريخ', save:'حفظ العملية', statsTitle:'الإحصائيات', totalSpentMonth:'إجمالي المصروف هذا الشهر',
+    byCategory:'حسب الفئة', vsLastMonth:'مقارنة بالشهر الماضي', lastMonth:'الشهر الماضي', thisMonth:'هذا الشهر',
+    monthlyBudget:'الميزانية الشهرية', goalsTitle:'أهداف الادخار', newGoal:'هدف جديد', goalName:'اسم الهدف',
+    targetAmount:'المبلغ المستهدف', savedSoFar:'المدخر حاليًا', addGoalBtn:'إضافة الهدف', yourGoals:'أهدافك',
+    settingsTitle:'الإعدادات', darkMode:'الوضع الليلي', darkModeSub:'مريح للعين مساءً', language:'اللغة',
+    resetData:'حذف كل البيانات', resetSub:'لا يمكن التراجع عن هذا', resetBtn:'إعادة تعيين',
+    tabHome:'الرئيسية', tabStats:'إحصائيات', tabGoals:'الأهداف', tabSettings:'الإعدادات',
+    noBudget:'لم تحدد ميزانية بعد', noTx:'لا توجد عمليات بعد', addFirst:'أضف أول عملية لك', currency:'$',
+    toastSaved:'تم حفظ العملية', toastBudget:'تم تحديث الميزانية', toastGoal:'تمت إضافة الهدف',
+    toastReset:'تم حذف كل البيانات', toastNeedAmount:'أدخل مبلغًا صحيحًا', toastNeedName:'أدخل اسم الهدف',
+    remaining:'المتبقي', ofBudget:'من الميزانية', noGoals:'لا توجد أهداف بعد', allCats:'كل الفئات',
+    saved:'مدخر', of:'من',
+    proTitle:'SpendWise Pro', proActive:'اشتراكك فعّال', proFeaturesTitle:'ماذا تحصل عليه؟',
+    featColors:'تغيير لون التطبيق (أزرق، بنفسجي، أخضر فاتح)', featTextColor:'تخصيص لون الأرقام والنصوص',
+    featCompare:'مقارنة متقدمة بين الأشهر', featPie:'مبيان دائري للمصاريف', featAlerts:'تنبيهات إشعارات عند اقتراب حد الميزانية',
+    choosePlan:'اختر خطتك', popular:'الأكثر شيوعًا', plan6Name:'٦ أشهر', plan6Desc:'أقل من $1.7 شهريًا',
+    bestValue:'أفضل قيمة', plan12Name:'١٢ شهرًا', plan12Desc:'أقل من $1.7 شهريًا، سنة كاملة',
+    chooseThis:'اختر هذه الخطة', cancelPro:'إلغاء الاشتراك', appColor:'لون التطبيق', appColorSub:'اختر هوية لونية فاتحة',
+    colorDefault:'الأصلي', colorBlue:'أزرق فاتح', colorPurple:'بنفسجي فاتح', colorGreen:'أخضر فاتح',
+    lockAppearance:'خاصية Pro — اشترك لتغيير لون التطبيق', upgrade:'الترقية إلى Pro',
+    textColor:'لون النصوص والأرقام', textColorSub:'خصص لون الأرقام في التطبيق', lockTextColor:'خاصية Pro — اشترك لتخصيص لون النصوص',
+    budgetAlerts:'تنبيهات الميزانية', budgetAlertsSub:'إشعار عند اقتراب حد الميزانية', lockAlerts:'خاصية Pro — اشترك لتفعيل التنبيهات',
+    pieTitle:'توزيع المصاريف (دائري)', lockPie:'خاصية Pro — اشترك لعرض المبيان الدائري',
+    sixMonthTitle:'مقارنة آخر 6 أشهر', lockMultiMonth:'خاصية Pro — اشترك لعرض مقارنة الأشهر المتقدمة',
+    toastSubscribed:'تم تفعيل اشتراك Pro بنجاح 🎉', toastCancelled:'تم إلغاء الاشتراك', activeUntil:'خطة',
+    alertNearBudget:'تنبيه: اقتربت من حد ميزانيتك الشهرية', alertOverBudget:'تنبيه: تجاوزت ميزانيتك الشهرية',
+  },
+  en: {
+    appbarSub:'Track your spending smartly', usedOfBudget:'used', spentThisMonth:'Spent this month', editBudget:'Edit budget',
+    income:'Income', expenses:'Expenses', recentTx:'Recent transactions', seeAll:'See all', allTx:'All transactions', search:'Search',
+    addTx:'Add transaction', expense:'Expense', income2:'Income', amount:'Amount', category:'Category', note:'Note (optional)',
+    date:'Date', save:'Save transaction', statsTitle:'Statistics', totalSpentMonth:'Total spent this month',
+    byCategory:'By category', vsLastMonth:'Vs last month', lastMonth:'Last month', thisMonth:'This month',
+    monthlyBudget:'Monthly budget', goalsTitle:'Savings goals', newGoal:'New goal', goalName:'Goal name',
+    targetAmount:'Target amount', savedSoFar:'Saved so far', addGoalBtn:'Add goal', yourGoals:'Your goals',
+    settingsTitle:'Settings', darkMode:'Dark mode', darkModeSub:'Easier on the eyes at night', language:'Language',
+    resetData:'Delete all data', resetSub:'This cannot be undone', resetBtn:'Reset',
+    tabHome:'Home', tabStats:'Stats', tabGoals:'Goals', tabSettings:'Settings',
+    noBudget:'No budget set yet', noTx:'No transactions yet', addFirst:'Add your first transaction', currency:'$',
+    toastSaved:'Transaction saved', toastBudget:'Budget updated', toastGoal:'Goal added',
+    toastReset:'All data cleared', toastNeedAmount:'Enter a valid amount', toastNeedName:'Enter a goal name',
+    remaining:'Remaining', ofBudget:'of budget', noGoals:'No goals yet', allCats:'All categories',
+    saved:'saved', of:'of',
+    proTitle:'SpendWise Pro', proActive:'Your subscription is active', proFeaturesTitle:"What you'll get",
+    featColors:'Change app color (light blue, purple, green)', featTextColor:'Customize number & text color',
+    featCompare:'Advanced month-to-month comparison', featPie:'Pie chart of expenses', featAlerts:'Alerts near your budget limit',
+    choosePlan:'Choose your plan', popular:'Most popular', plan6Name:'6 months', plan6Desc:'Less than $1.7/month',
+    bestValue:'Best value', plan12Name:'12 months', plan12Desc:'Less than $1.7/month, full year',
+    chooseThis:'Choose this plan', cancelPro:'Cancel subscription', appColor:'App color', appColorSub:'Pick a light color identity',
+    colorDefault:'Default', colorBlue:'Light blue', colorPurple:'Light purple', colorGreen:'Light green',
+    lockAppearance:'Pro feature — subscribe to change the app color', upgrade:'Upgrade to Pro',
+    textColor:'Text & number color', textColorSub:'Customize the color of numbers in the app', lockTextColor:'Pro feature — subscribe to customize text color',
+    budgetAlerts:'Budget alerts', budgetAlertsSub:'Get notified near your budget limit', lockAlerts:'Pro feature — subscribe to enable alerts',
+    pieTitle:'Expense breakdown (pie chart)', lockPie:'Pro feature — subscribe to view the pie chart',
+    sixMonthTitle:'Last 6 months comparison', lockMultiMonth:'Pro feature — subscribe to view advanced comparison',
+    toastSubscribed:'Pro subscription activated 🎉', toastCancelled:'Subscription cancelled', activeUntil:'Plan',
+    alertNearBudget:'Alert: you are close to your monthly budget', alertOverBudget:'Alert: you exceeded your monthly budget',
+  }
+};
+
+let currentTxType = 'expense';
+let selectedCat = 'food';
+
+function t(key){ return I18N[state.lang][key] || key; }
+function fmt(n){ return '$' + (Math.round(n*100)/100).toLocaleString(state.lang==='ar'?'ar-MA':'en-US'); }
+
+// ---------- Navigation ----------
+function go(screen){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===screen));
+  if(screen==='add'){
+    document.getElementById('dateInput').value = new Date().toISOString().slice(0,10);
+  }
+  if(screen==='transactions') renderTxList();
+  if(screen==='stats') renderStats();
+  if(screen==='goals') renderGoals();
+  if(screen==='budget') document.getElementById('budgetInput').value = state.budget || '';
+  if(screen==='pro') renderProScreen();
+  window.scrollTo(0,0);
+}
+
+// ---------- Lang / Theme ----------
+function setLang(lang){
+  state.lang = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang==='ar' ? 'rtl' : 'ltr';
+  document.getElementById('langSelect').value = lang;
+  document.getElementById('chipAr').classList.toggle('selected', lang==='ar');
+  document.getElementById('chipEn').classList.toggle('selected', lang==='en');
+  document.getElementById('chipAr').style.background = lang==='ar' ? 'var(--teal)' : '';
+  document.getElementById('chipEn').style.background = lang==='en' ? 'var(--teal)' : '';
+  document.getElementById('langSub').textContent = lang==='ar' ? 'العربية' : 'English';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.getElementById('searchInput').placeholder = lang==='ar' ? 'ابحث...' : 'Search...';
+  buildCategoryChips();
+  buildFilterSelect();
+  renderHome(); renderTxList(); renderStats(); renderGoals();
+  renderProScreen(); updateProBadge();
+}
+
+function toggleDark(){
+  state.dark = !state.dark;
+  document.documentElement.classList.toggle('dark', state.dark);
+  document.getElementById('darkToggle').classList.toggle('on', state.dark);
+}
+
+// ---------- Toast ----------
+let toastTimer;
+function showToast(msg, warn){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.toggle('warn', !!warn);
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 2200);
+}
+
+// ---------- Categories UI ----------
+function catLabel(cat){ return state.lang==='ar' ? cat.ar : cat.en; }
+
+function buildCategoryChips(){
+  const wrap = document.getElementById('categoryChips');
+  wrap.innerHTML = '';
+  CATEGORIES.forEach(cat=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (cat.id===selectedCat ? ' selected' : '');
+    chip.style.background = cat.id===selectedCat ? cat.color : '';
+    chip.innerHTML = `<span class="dot" style="background:${cat.color}"></span>${catLabel(cat)}`;
+    chip.onclick = ()=>{ selectedCat = cat.id; buildCategoryChips(); };
+    wrap.appendChild(chip);
+  });
+}
+
+function buildFilterSelect(){
+  const sel = document.getElementById('filterCat');
+  const current = sel.value;
+  sel.innerHTML = `<option value="">${t('allCats')}</option>` + CATEGORIES.map(c=>`<option value="${c.id}">${catLabel(c)}</option>`).join('');
+  sel.value = current || '';
+}
+
+function setTxType(type){
+  currentTxType = type;
+  document.querySelectorAll('#typeSeg button').forEach(b=>b.classList.toggle('active', b.dataset.type===type));
+}
+
+function toggleSearch(){
+  document.getElementById('searchBar').classList.toggle('show');
+}
+
+// ---------- Transactions ----------
+function saveTransaction(){
+  const amount = parseFloat(document.getElementById('amountInput').value);
+  if(!amount || amount<=0){ showToast(t('toastNeedAmount'), true); return; }
+  const tx = {
+    id: Date.now(),
+    type: currentTxType,
+    category: selectedCat,
+    amount: amount,
+    note: document.getElementById('noteInput').value.trim(),
+    date: document.getElementById('dateInput').value || new Date().toISOString().slice(0,10),
+  };
+  state.transactions.unshift(tx);
+  document.getElementById('amountInput').value = '';
+  document.getElementById('noteInput').value = '';
+  showToast(t('toastSaved'));
+  renderHome();
+  go('home');
+}
+
+function deleteTx(id){
+  state.transactions = state.transactions.filter(tx=>tx.id!==id);
+  renderHome(); renderTxList(); renderStats();
+}
+
+function txRow(tx, showDel){
+  const cat = CATEGORIES.find(c=>c.id===tx.category) || CATEGORIES[CATEGORIES.length-1];
+  const sign = tx.type==='income' ? '+' : '-';
+  const color = tx.type==='income' ? 'var(--teal-light)' : 'var(--terracotta)';
+  return `<div class="tx-item">
+    <div class="tx-dot" style="background:${cat.color}"></div>
+    <div class="tx-body">
+      <div class="tx-cat">${catLabel(cat)}</div>
+      ${tx.note ? `<div class="tx-note">${escapeHtml(tx.note)}</div>` : ''}
+      <div class="tx-date">${tx.date}</div>
+    </div>
+    <div class="tx-amount num" style="color:${color}">${sign}${fmt(tx.amount)}</div>
+    ${showDel ? `<button class="tx-del" onclick="deleteTx(${tx.id})">×</button>` : ''}
+  </div>`;
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function emptyState(){
+  return `<div class="empty">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M9 12h6m-6 4h6M8 3h8a2 2 0 012 2v14a2 2 0 01-2 2H8a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="currentColor" stroke-width="1.6"/></svg>
+    <p>${t('noTx')}</p>
+  </div>`;
+}
+
+function renderHome(){
+  const income = state.transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = state.transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  document.getElementById('homeIncome').textContent = fmt(income);
+  document.getElementById('homeExpense').textContent = fmt(expense);
+  document.getElementById('spentAmount').textContent = fmt(expense);
+
+  const budget = state.budget;
+  const accentNow = getComputedStyle(document.documentElement).getPropertyValue('--amber').trim() || '#D4A24C';
+  if(budget && budget>0){
+    const pct = Math.min(100, Math.round((expense/budget)*100));
+    const circumference = 276.5;
+    const offset = circumference - (circumference*pct/100);
+    document.getElementById('ringProgress').style.strokeDashoffset = offset;
+    document.getElementById('ringProgress').setAttribute('stroke', pct>=100 ? '#C1512E' : accentNow);
+    document.getElementById('ringPct').textContent = pct+'%';
+    const remaining = budget - expense;
+    document.getElementById('ringGoalText').textContent = `${fmt(Math.max(0,remaining))} ${t('remaining')} ${t('of')} ${fmt(budget)}`;
+    checkBudgetAlert(expense);
+  } else {
+    document.getElementById('ringProgress').style.strokeDashoffset = 276.5;
+    document.getElementById('ringPct').textContent = '0%';
+    document.getElementById('ringGoalText').textContent = t('noBudget');
+  }
+
+  const recent = state.transactions.slice(0,5);
+  document.getElementById('recentTxList').innerHTML = recent.length
+    ? recent.map(tx=>txRow(tx,false)).join('')
+    : emptyState();
+}
+
+function renderTxList(){
+  buildFilterSelect();
+  const q = (document.getElementById('searchInput').value||'').toLowerCase();
+  const cat = document.getElementById('filterCat').value;
+  let list = state.transactions.filter(tx=>{
+    const matchQ = !q || tx.note.toLowerCase().includes(q) || catLabel(CATEGORIES.find(c=>c.id===tx.category)||{}).toLowerCase().includes(q);
+    const matchC = !cat || tx.category===cat;
+    return matchQ && matchC;
+  });
+  document.getElementById('fullTxList').innerHTML = list.length
+    ? list.map(tx=>txRow(tx,true)).join('')
+    : emptyState();
+}
+
+// ---------- Budget ----------
+function saveBudget(){
+  const val = parseFloat(document.getElementById('budgetInput').value);
+  if(!val || val<=0){ showToast(t('toastNeedAmount'), true); return; }
+  state.budget = val;
+  showToast(t('toastBudget'));
+  renderHome();
+  go('home');
+}
+
+// ---------- Stats ----------
+function monthKey(dateStr, offset=0){
+  const d = new Date(dateStr);
+  d.setMonth(d.getMonth()+offset);
+  return d.getFullYear()+'-'+d.getMonth();
+}
+
+function renderStats(){
+  const now = new Date();
+  const curKey = now.getFullYear()+'-'+now.getMonth();
+  const lastDate = new Date(now); lastDate.setMonth(lastDate.getMonth()-1);
+  const lastKey = lastDate.getFullYear()+'-'+lastDate.getMonth();
+
+  const thisMonthTx = state.transactions.filter(tx=>tx.type==='expense' && monthKey(tx.date)===curKey);
+  const lastMonthTx = state.transactions.filter(tx=>tx.type==='expense' && monthKey(tx.date)===lastKey);
+
+  const totalThis = thisMonthTx.reduce((s,t)=>s+t.amount,0);
+  const totalLast = lastMonthTx.reduce((s,t)=>s+t.amount,0);
+
+  document.getElementById('statsTotalSpent').textContent = fmt(totalThis);
+  document.getElementById('cmpThis').textContent = fmt(totalThis);
+  document.getElementById('cmpLast').textContent = fmt(totalLast);
+
+  const diffEl = document.getElementById('cmpDiff');
+  if(totalLast===0 && totalThis===0){
+    diffEl.textContent = '';
+  } else if(totalLast===0){
+    diffEl.textContent = state.lang==='ar' ? 'عملية جديدة هذا الشهر' : 'New spending this month';
+    diffEl.className = 'compare-diff up';
+  } else {
+    const diffPct = Math.round(((totalThis-totalLast)/totalLast)*100);
+    diffEl.textContent = (diffPct>=0 ? '+' : '') + diffPct + '% ' + (state.lang==='ar' ? 'مقارنة بالشهر الماضي' : 'vs last month');
+    diffEl.className = 'compare-diff ' + (diffPct>=0 ? 'up' : 'down');
+  }
+
+  const byCat = {};
+  thisMonthTx.forEach(tx=>{ byCat[tx.category] = (byCat[tx.category]||0) + tx.amount; });
+  const max = Math.max(1, ...Object.values(byCat));
+  const barsHtml = CATEGORIES.filter(c=>byCat[c.id]).sort((a,b)=>byCat[b.id]-byCat[a.id]).map(c=>{
+    const val = byCat[c.id];
+    const pct = Math.round((val/max)*100);
+    return `<div class="bar-row">
+      <div class="top"><span class="catname">${catLabel(c)}</span><span class="catval num">${fmt(val)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('statsBars').innerHTML = barsHtml || `<div class="empty"><p>${t('noTx')}</p></div>`;
+
+  renderPieChart(byCat, totalThis);
+  renderMultiMonth();
+}
+
+// ---------- Goals ----------
+function addGoal(){
+  const name = document.getElementById('goalName').value.trim();
+  const target = parseFloat(document.getElementById('goalTarget').value);
+  const saved = parseFloat(document.getElementById('goalSaved').value) || 0;
+  if(!name){ showToast(t('toastNeedName'), true); return; }
+  if(!target || target<=0){ showToast(t('toastNeedAmount'), true); return; }
+  state.goals.unshift({ id:Date.now(), name, target, saved });
+  document.getElementById('goalName').value = '';
+  document.getElementById('goalTarget').value = '';
+  document.getElementById('goalSaved').value = '';
+  showToast(t('toastGoal'));
+  renderGoals();
+}
+
+function deleteGoal(id){
+  state.goals = state.goals.filter(g=>g.id!==id);
+  renderGoals();
+}
+
+function renderGoals(){
+  const list = document.getElementById('goalsList');
+  if(!state.goals.length){
+    list.innerHTML = `<div class="empty"><p>${t('noGoals')}</p></div>`;
+    return;
+  }
+  list.innerHTML = state.goals.map(g=>{
+    const pct = Math.min(100, Math.round((g.saved/g.target)*100));
+    return `<div class="goal-item">
+      <div class="goal-item-head">
+        <div>
+          <div class="gt">${escapeHtml(g.name)}</div>
+          <div class="gd">${fmt(g.saved)} ${t('saved')} ${t('of')} ${fmt(g.target)} (${pct}%)</div>
+        </div>
+        <button class="tx-del" onclick="deleteGoal(${g.id})">×</button>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--amber)"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ---------- Reset ----------
+function resetData(){
+  state.transactions = [];
+  state.goals = [];
+  state.budget = 3000;
+  showToast(t('toastReset'));
+  renderHome(); renderTxList(); renderStats(); renderGoals();
+}
+
+// ---------- Pro subscription ----------
+function renderProScreen(){
+  document.getElementById('proActiveBanner').style.display = state.isPro ? 'flex' : 'none';
+  if(state.isPro){
+    const planLabel = state.proPlan==='m12' ? t('plan12Name') : t('plan6Name');
+    document.getElementById('proActiveSub').textContent = t('activeUntil') + ': ' + planLabel;
+  }
+  document.getElementById('planCard6').classList.toggle('current', state.isPro && state.proPlan==='m6');
+  document.getElementById('planCard12').classList.toggle('current', state.isPro && state.proPlan==='m12');
+  document.getElementById('plan6Btn').textContent = (state.isPro && state.proPlan==='m6') ? '✓' : t('chooseThis');
+  document.getElementById('plan12Btn').textContent = (state.isPro && state.proPlan==='m12') ? '✓' : t('chooseThis');
+  document.getElementById('cancelProBtn').style.display = state.isPro ? 'block' : 'none';
+}
+
+function selectPlan(plan){ subscribePlan(plan); }
+
+function subscribePlan(plan){
+  state.isPro = true;
+  state.proPlan = plan;
+  showToast(t('toastSubscribed'));
+  updateProLocks();
+  renderProScreen();
+  updateProBadge();
+}
+
+function cancelPro(){
+  state.isPro = false;
+  state.proPlan = null;
+  state.accentColor = 'default';
+  state.textColor = 'default';
+  state.alertsEnabled = false;
+  applyAccentColor(); applyTextColor();
+  showToast(t('toastCancelled'));
+  updateProLocks();
+  renderProScreen();
+  updateProBadge();
+}
+
+function updateProBadge(){
+  document.getElementById('proHeaderBtn').style.opacity = state.isPro ? '1' : '';
+  document.getElementById('proBtnLabel').textContent = state.isPro ? (state.lang==='ar' ? 'Pro ✓' : 'Pro ✓') : 'Pro';
+}
+
+function updateProLocks(){
+  ['appearanceLock','textColorLock','alertsLock','pieLock','multiMonthLock'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.style.display = state.isPro ? 'none' : 'flex';
+  });
+  document.getElementById('alertsToggle').classList.toggle('on', state.alertsEnabled);
+  renderStats();
+}
+
+// ---------- Appearance (Pro) ----------
+function setAccentColor(color){
+  if(!state.isPro){ go('pro'); return; }
+  state.accentColor = color;
+  applyAccentColor();
+  ['Default','Blue','Purple','Green'].forEach(c=>{
+    document.getElementById('swatch'+c).classList.toggle('active', c.toLowerCase()===color);
+  });
+}
+function applyAccentColor(){
+  const c = ACCENT_COLORS[state.accentColor] || ACCENT_COLORS.default;
+  document.documentElement.style.setProperty('--amber', c.main);
+  document.documentElement.style.setProperty('--amber-dark', c.dark);
+  document.querySelectorAll('.tab-fab').forEach(el=>{ el.style.boxShadow = '0 8px 18px -6px ' + c.shadow; });
+  renderHome();
+}
+
+function setTextColor(color){
+  if(!state.isPro){ go('pro'); return; }
+  state.textColor = color;
+  applyTextColor();
+  ['Default','Blue','Purple','Green'].forEach(c=>{
+    document.getElementById('tswatch'+c).classList.toggle('active', c.toLowerCase()===color);
+  });
+}
+function applyTextColor(){
+  const c = TEXT_COLORS[state.textColor] || TEXT_COLORS.default;
+  document.documentElement.style.setProperty('--text-accent', c);
+}
+
+function toggleAlerts(){
+  if(!state.isPro){ go('pro'); return; }
+  state.alertsEnabled = !state.alertsEnabled;
+  document.getElementById('alertsToggle').classList.toggle('on', state.alertsEnabled);
+}
+
+// ---------- Pie chart (Pro) ----------
+function renderPieChart(byCat, total){
+  const svg = document.getElementById('pieChart');
+  const legend = document.getElementById('pieLegend');
+  if(!total){ svg.innerHTML=''; legend.innerHTML = `<div style="font-size:11px;color:var(--ink-soft)">${t('noTx')}</div>`; return; }
+  let angle = 0;
+  const cx=70, cy=70, r=62;
+  let paths = '';
+  const entries = CATEGORIES.filter(c=>byCat[c.id]).sort((a,b)=>byCat[b.id]-byCat[a.id]);
+  entries.forEach(cat=>{
+    const val = byCat[cat.id];
+    const slice = (val/total)*360;
+    const x1 = cx + r*Math.cos(Math.PI*(angle-90)/180);
+    const y1 = cy + r*Math.sin(Math.PI*(angle-90)/180);
+    angle += slice;
+    const x2 = cx + r*Math.cos(Math.PI*(angle-90)/180);
+    const y2 = cy + r*Math.sin(Math.PI*(angle-90)/180);
+    const large = slice>180 ? 1 : 0;
+    paths += `<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${cat.color}" />`;
+  });
+  svg.innerHTML = paths + `<circle cx="${cx}" cy="${cy}" r="26" fill="var(--cream)" />`;
+  legend.innerHTML = entries.map(cat=>{
+    const pct = Math.round((byCat[cat.id]/total)*100);
+    return `<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink)"><span style="width:8px;height:8px;border-radius:50%;background:${cat.color};display:inline-block"></span>${catLabel(cat)} · ${pct}%</div>`;
+  }).join('');
+}
+
+// ---------- Multi-month comparison (Pro) ----------
+function renderMultiMonth(){
+  const wrap = document.getElementById('multiMonthBars');
+  const now = new Date();
+  const months = [];
+  for(let i=5;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push(d);
+  }
+  const totals = months.map(d=>{
+    const key = d.getFullYear()+'-'+d.getMonth();
+    return state.transactions.filter(tx=>tx.type==='expense' && monthKey(tx.date)===key).reduce((s,tx)=>s+tx.amount,0);
+  });
+  const max = Math.max(1, ...totals);
+  const fmtMonth = (d)=> d.toLocaleDateString(state.lang==='ar' ? 'ar-MA' : 'en-US', {month:'short'});
+  wrap.innerHTML = months.map((d,i)=>{
+    const pct = Math.round((totals[i]/max)*100);
+    return `<div class="bar-row">
+      <div class="top"><span class="catname">${fmtMonth(d)}</span><span class="catval num">${fmt(totals[i])}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--teal)"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ---------- Budget alerts (Pro) ----------
+function checkBudgetAlert(expense){
+  if(!state.isPro || !state.alertsEnabled || !state.budget) return;
+  const pct = expense / state.budget;
+  if(pct>=1){ showToast(t('alertOverBudget'), true); }
+  else if(pct>=0.8){ showToast(t('alertNearBudget'), true); }
+}
+
+// ---------- Init ----------
+function init(){
+  buildCategoryChips();
+  buildFilterSelect();
+  setLang('ar');
+  document.getElementById('dateInput').value = new Date().toISOString().slice(0,10);
+  applyAccentColor();
+  applyTextColor();
+  updateProLocks();
+  updateProBadge();
+  renderHome();
+}
+init();
+</script>
+</body>
+</html>
