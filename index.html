@@ -1254,19 +1254,82 @@ const SUPABASE_URL = 'https://qxvtlkhbalsitjcftptkl.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4dnRsa2hiYWxzaXRjZnRwdGtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNjAwODMsImV4cCI6MjEwMDczNjA4M30.QEMQGKV9h1L7KdO7T6OAxsZTeOWkfHeZZyV_Ak3D-UA';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// --------- Supabase Data Sync Functions ---------
+async function loadDataFromSupabase() {
+try {
+        const { data: txs, error: txError } = await supabase.from('transactions').select('*');
+        if (!txError && txs) {
+            state.transactions = txs.map(t => ({
+                id: t.id,
+                type: t.type,
+                category: t.category,
+                amount: Number(t.amount),
+                note: t.note,
+                date: t.date
+            }));
+        }
+
+        const { data: gls, error: glError } = await supabase.from('goals').select('*');
+        if (!glError && gls) {
+            state.goals = gls.map(g => ({
+                id: g.id,
+                name: g.name,
+                target: Number(g.target),
+                saved: Number(g.saved || 0)
+            }));
+        }
+        
+        renderHome();
+        if (typeof renderAnalytics === 'function') renderAnalytics();
+    } catch (err) {
+        console.error('Error loading from Supabase:', err);
+    }
+}
+
+async function addTransactionToSupabase(tx) {
+    try {
+        const { data, error } = await supabase.from('transactions').insert([{
+            type: tx.type,
+            category: tx.category,
+            amount: tx.amount,
+            note: tx.note || '',
+            date: tx.date
+        }]).select();
+
+        if (error) {
+            console.error('Error inserting transaction:', error);
+        } else if (data && data.length > 0) {
+            state.transactions.unshift({
+                id: data[0].id,
+                type: data[0].type,
+                category: data[0].category,
+                amount: Number(data[0].amount),
+                note: data[0].note,
+                date: data[0].date
+            });
+            renderHome();
+        }
+    } catch (err) {
+        console.error('Sync error:', err);
+    }
+}
 
 // ---------- Init ----------
-function init(){
-  buildCategoryChips();
-  buildFilterSelect();
-  setLang('ar');
-  document.getElementById('dateInput').value = new Date().toISOString().slice(0,10);
-  applyAccentColor();
-  applyTextColor();
-  updateProLocks();
-  updateProBadge();
-  renderHome();
+async function init(){
+    buildCategoryChips();
+    buildFilterSelect();
+    setLang('ar');
+    document.getElementById('dateInput').value = new Date().toISOString().slice(0,10);
+    applyAccentColor();
+    applyTextColor();
+    updateProLocks();
+    updateProBadge();
+    renderHome();
+    
+    // استدعاء البيانات من Supabase عند فتح التطبيق
+    await loadDataFromSupabase();
 }
+
 init();
 </script>
 </body>
