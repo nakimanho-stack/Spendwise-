@@ -63,7 +63,7 @@
     transition:background .2s;
   }
   html.dark .phone{ background:rgba(8,22,20,.88); border-color:rgba(255,255,255,.08); }
-  @media (min-width:560px) and (min-height:760px){
+  @media (min-width:900px) and (min-height:760px) and (pointer:fine){
     .phone{ height:min(860px,92dvh); border-radius:44px; border:10px solid rgba(5,32,30,.85); box-shadow:0 30px 60px -20px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08) inset; }
   }
 
@@ -270,10 +270,117 @@
   .goal-item .bar-track{ margin-top:8px; }
   .goal-del{ float:inset-inline-end; }
   .goal-item-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+
+  /* ---- Auth overlay ---- */
+  .auth-overlay{ position:absolute; inset:0; z-index:200; background:var(--cream); display:flex; flex-direction:column; overflow-y:auto; padding: calc(28px + var(--safe-t)) 22px calc(24px + var(--safe-b)); }
+  .auth-overlay.hidden{ display:none; }
+  .auth-overlay::-webkit-scrollbar{ display:none; }
+  .auth-logo-wrap{ text-align:center; margin-bottom:22px; }
+  .auth-logo{ width:56px;height:56px;border-radius:16px;background:var(--amber);display:flex;align-items:center;justify-content:center;margin:0 auto 12px; }
+  .auth-app-name{ font-family:var(--font-display); font-weight:800; font-size:22px; color:var(--ink); }
+  .auth-app-tag{ font-size:12px; color:var(--ink-soft); margin-top:4px; }
+  .auth-step{ display:none; }
+  .auth-step.active{ display:block; }
+  .auth-method-btn{ width:100%; display:flex; align-items:center; justify-content:center; gap:10px; border:1.5px solid var(--border); background:var(--cream); border-radius:14px; padding:13px; font-family:var(--font-display); font-weight:700; font-size:13.5px; color:var(--ink); cursor:pointer; margin-bottom:12px; }
+  .auth-method-btn svg{ width:18px;height:18px; }
+  .auth-method-btn.google{ background:#fff; }
+  .auth-back-link{ text-align:center; margin-top:14px; font-size:12px; color:var(--teal); cursor:pointer; font-weight:600; }
+  .otp-row{ display:flex; gap:8px; justify-content:center; margin-bottom:16px; direction:ltr; }
+  .otp-row input{ width:44px; height:52px; text-align:center; font-size:20px; font-weight:700; border:1.5px solid var(--border); border-radius:12px; background:var(--sand); color:var(--ink); outline:none; font-family:'Space Grotesk',sans-serif; }
+  .otp-row input:focus{ border-color:var(--teal-light); }
+  .auth-note{ background:var(--teal-pale); border-radius:12px; padding:10px 12px; font-size:11px; color:var(--teal); margin-bottom:14px; line-height:1.6; }
+  .auth-seg{ display:flex; background:var(--sand); border-radius:100px; padding:3px; margin-bottom:18px; }
+  .auth-seg button{ flex:1; border:none; background:transparent; padding:8px 6px; border-radius:100px; font-size:12px; color:var(--ink-soft); cursor:pointer; font-weight:600; }
+  .auth-seg button.active{ background:var(--teal); color:var(--on-accent); }
+  .auth-error{ color:var(--terracotta); font-size:11.5px; margin:-8px 0 12px; display:none; }
+  .auth-error.show{ display:block; }
+  .auth-loading{ text-align:center; padding:30px 10px; color:var(--ink-soft); font-size:12.5px; }
+  .account-card{ display:flex; align-items:center; gap:10px; }
+  .account-avatar{ width:38px;height:38px;border-radius:50%; background:var(--teal); color:var(--on-accent); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:15px; flex-shrink:0; }
+  .account-info{ flex:1; min-width:0; }
+  .account-email{ font-size:12.5px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .account-method{ font-size:10.5px; color:var(--ink-soft); margin-top:1px; }
+  .sync-dot{ width:7px; height:7px; border-radius:50%; background:var(--teal-light); flex-shrink:0; }
+  .sync-dot.syncing{ background:var(--amber); }
+  .sync-dot.error{ background:var(--terracotta); }
 </style>
 </head>
 <body>
 <div class="phone" id="phone">
+
+  <!-- AUTH OVERLAY -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-logo-wrap">
+      <div class="auth-logo">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h11" stroke="#2A1D06" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </div>
+      <div class="auth-app-name">SpendWise</div>
+      <div class="auth-app-tag" data-i18n="authTag">سجل الدخول لحفظ بياناتك عبر كل أجهزتك</div>
+    </div>
+
+    <!-- STEP: methods -->
+    <div class="auth-step active" id="authStep-methods">
+      <button class="auth-method-btn google" onclick="authGoogle()">
+        <svg viewBox="0 0 48 48" width="18" height="18"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14.3-5.6l-6.6-5.6C29.6 34.5 27 35.5 24 35.5c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-0.8 2.3-2.3 4.3-4.2 5.7l6.6 5.6C39.9 37.5 44 31.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        <span data-i18n="continueGoogle">المتابعة عبر جوجل</span>
+      </button>
+      <button class="auth-method-btn" onclick="authGo('phone-number')">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M17 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2zM12 18h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span data-i18n="continuePhone">المتابعة برقم الهاتف</span>
+      </button>
+      <button class="auth-method-btn" onclick="authGo('email')">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-i18n="continueEmail">المتابعة بالبريد الإلكتروني</span>
+      </button>
+      <div class="auth-error show" id="authConfigNote" style="margin-top:10px;color:var(--ink-soft)"></div>
+    </div>
+
+    <!-- STEP: phone number -->
+    <div class="auth-step" id="authStep-phone-number">
+      <span class="field-label" data-i18n="phoneNumber">رقم الهاتف (مع رمز الدولة)</span>
+      <input type="tel" class="text-input" id="phoneInput" placeholder="+212 6XX XXXXXX" dir="ltr">
+      <div class="auth-error" id="phoneError"></div>
+      <div id="recaptcha-container"></div>
+      <button class="btn-primary" onclick="sendPhoneCode()" data-i18n="sendCodeSms">إرسال رمز عبر SMS</button>
+      <div class="auth-back-link" onclick="authGo('methods')" data-i18n="back">رجوع</div>
+    </div>
+
+    <!-- STEP: phone otp -->
+    <div class="auth-step" id="authStep-phone-otp">
+      <div class="auth-note" id="otpNote" data-i18n="otpSentNote">تم إرسال رمز مكون من 6 أرقام إلى هاتفك عبر SMS</div>
+      <div class="otp-row">
+        <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+        <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+        <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+        <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+        <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+        <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+      </div>
+      <div class="auth-error" id="otpError"></div>
+      <button class="btn-primary" onclick="verifyPhoneCode()" data-i18n="verifyCode">تحقق من الرمز</button>
+      <div class="auth-back-link" onclick="authGo('phone-number')" data-i18n="back">رجوع</div>
+    </div>
+
+    <!-- STEP: email -->
+    <div class="auth-step" id="authStep-email">
+      <div class="auth-seg" id="emailSeg">
+        <button class="active" data-mode="login" onclick="setEmailMode('login')" data-i18n="login">تسجيل الدخول</button>
+        <button data-mode="signup" onclick="setEmailMode('signup')" data-i18n="signup">إنشاء حساب</button>
+      </div>
+      <span class="field-label" data-i18n="email">البريد الإلكتروني</span>
+      <input type="email" class="text-input" id="emailInput" placeholder="you@example.com" dir="ltr">
+      <span class="field-label" data-i18n="password">كلمة المرور</span>
+      <input type="password" class="text-input" id="passwordInput" placeholder="••••••••" dir="ltr">
+      <div class="auth-error" id="emailError"></div>
+      <button class="btn-primary" id="emailSubmitBtn" onclick="submitEmailAuth()" data-i18n="login">تسجيل الدخول</button>
+      <div class="auth-back-link" onclick="authGo('methods')" data-i18n="back">رجوع</div>
+    </div>
+
+    <!-- STEP: loading -->
+    <div class="auth-step" id="authStep-loading">
+      <div class="auth-loading" data-i18n="loadingData">جاري تحميل بياناتك...</div>
+    </div>
+  </div>
 
   <header class="appbar">
     <div class="appbar-row">
@@ -551,6 +658,18 @@
       </div>
 
       <div class="feature-card">
+        <div class="feature-head" style="margin-bottom:0">
+          <div class="account-avatar" id="accountAvatar">?</div>
+          <div class="account-info">
+            <div class="account-email" id="accountEmail">—</div>
+            <div class="account-method" id="accountMethod">—</div>
+          </div>
+          <div class="sync-dot" id="syncDot" title="sync status"></div>
+        </div>
+        <button class="btn-secondary" onclick="doLogout()" data-i18n="logout">تسجيل الخروج</button>
+      </div>
+
+      <div class="feature-card">
         <div class="feature-head">
           <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" stroke="#FBF6EC" stroke-width="2" stroke-linejoin="round"/></svg></div>
           <div class="feature-title-row">
@@ -708,8 +827,20 @@
   </nav>
 </div>
 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
 <script>
-// ---------- State (in-memory only) ----------
+/* =========================================================================
+   SUPABASE CONFIG
+   ========================================================================= */
+const SUPABASE_URL = "https://qxvtlkhbalsitcftptkl.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4dnRsa2hiYWxzaXRjZnRwdGtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNjAwODMsImV4cCI6MjEwMDczNjA4M30.QEMQGKV9h1L7KdO7T6OAxsZTeOWkfHeZZyV_Ak3D-UA";
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+<script>
+// ---------- App state ----------
 const CATEGORIES = [
   { id:'food', ar:'طعام', en:'Food', color:'#C1512E' },
   { id:'transport', ar:'مواصلات', en:'Transport', color:'#2C8C82' },
@@ -732,6 +863,10 @@ let state = {
   textColor: 'default',
   alertsEnabled: false,
 };
+
+let currentUser = null;      // Supabase auth user object
+let pendingPhone = null;     // phone number awaiting OTP verification
+let emailMode = 'login';
 
 const ACCENT_COLORS = { blue:{main:'#8FB8E0',dark:'#6FA0CC',shadow:'rgba(143,184,224,.65)'}, purple:{main:'#B39DDB',dark:'#9575CD',shadow:'rgba(179,157,219,.65)'}, green:{main:'#93C6A6',dark:'#74AD8A',shadow:'rgba(147,198,166,.65)'}, default:{main:'#D4A24C',dark:'#B5822E',shadow:'rgba(212,162,76,.7)'} };
 const TEXT_COLORS = { blue:'#0001FB', purple:'#CA11F6', green:'#00D64A', default:'var(--ink)' };
@@ -767,6 +902,15 @@ const I18N = {
     sixMonthTitle:'مقارنة آخر 6 أشهر', lockMultiMonth:'خاصية Pro — اشترك لعرض مقارنة الأشهر المتقدمة',
     toastSubscribed:'تم تفعيل اشتراك Pro بنجاح 🎉', toastCancelled:'تم إلغاء الاشتراك', activeUntil:'خطة',
     alertNearBudget:'تنبيه: اقتربت من حد ميزانيتك الشهرية', alertOverBudget:'تنبيه: تجاوزت ميزانيتك الشهرية',
+    authTag:'سجل الدخول لحفظ بياناتك عبر كل أجهزتك', continueGoogle:'المتابعة عبر جوجل', continuePhone:'المتابعة برقم الهاتف',
+    continueEmail:'المتابعة بالبريد الإلكتروني', phoneNumber:'رقم الهاتف (مع رمز الدولة)', sendCodeSms:'إرسال رمز عبر SMS',
+    back:'رجوع', otpSentNote:'تم إرسال رمز مكون من 6 أرقام إلى هاتفك عبر SMS', verifyCode:'تحقق من الرمز',
+    login:'تسجيل الدخول', signup:'إنشاء حساب', email:'البريد الإلكتروني', password:'كلمة المرور',
+    loadingData:'جاري تحميل بياناتك...', logout:'تسجيل الخروج',
+    fillAllFields:'عمر جميع الخانات', enterValidPhone:'أدخل رقم هاتف صحيح مع رمز الدولة', wrongCode:'الرمز غير صحيح',
+    passwordTooShort:'كلمة المرور خاصها 6 حروف على الأقل', authError:'وقع خطأ، جرب مرة أخرى',
+    signedInAs:'داخل بحساب', methodGoogle:'جوجل', methodEmail:'بريد إلكتروني', methodPhone:'هاتف',
+    syncSaved:'تم الحفظ سحابيًا', syncError:'تعذر الحفظ السحابي', confirmEmailSent:'تحقق من بريدك الإلكتروني لتأكيد الحساب',
   },
   en: {
     appbarSub:'Track your spending smartly', usedOfBudget:'used', spentThisMonth:'Spent this month', editBudget:'Edit budget',
@@ -798,6 +942,15 @@ const I18N = {
     sixMonthTitle:'Last 6 months comparison', lockMultiMonth:'Pro feature — subscribe to view advanced comparison',
     toastSubscribed:'Pro subscription activated 🎉', toastCancelled:'Subscription cancelled', activeUntil:'Plan',
     alertNearBudget:'Alert: you are close to your monthly budget', alertOverBudget:'Alert: you exceeded your monthly budget',
+    authTag:'Sign in to save your data across all your devices', continueGoogle:'Continue with Google', continuePhone:'Continue with phone number',
+    continueEmail:'Continue with email', phoneNumber:'Phone number (with country code)', sendCodeSms:'Send code via SMS',
+    back:'Back', otpSentNote:'A 6-digit code was sent to your phone via SMS', verifyCode:'Verify code',
+    login:'Log in', signup:'Sign up', email:'Email', password:'Password',
+    loadingData:'Loading your data...', logout:'Log out',
+    fillAllFields:'Please fill in all fields', enterValidPhone:'Enter a valid phone number with country code', wrongCode:'Incorrect code',
+    passwordTooShort:'Password must be at least 6 characters', authError:'Something went wrong, please try again',
+    signedInAs:'Signed in as', methodGoogle:'Google', methodEmail:'Email', methodPhone:'Phone',
+    syncSaved:'Saved to cloud', syncError:'Cloud save failed', confirmEmailSent:'Check your email to confirm your account',
   }
 };
 
@@ -842,12 +995,15 @@ function setLang(lang){
   buildFilterSelect();
   renderHome(); renderTxList(); renderStats(); renderGoals();
   renderProScreen(); updateProBadge();
+  setEmailMode(emailMode);
+  saveUserData();
 }
 
 function toggleDark(){
   state.dark = !state.dark;
   document.documentElement.classList.toggle('dark', state.dark);
   document.getElementById('darkToggle').classList.toggle('on', state.dark);
+  saveUserData();
 }
 
 // ---------- Toast ----------
@@ -911,11 +1067,13 @@ function saveTransaction(){
   showToast(t('toastSaved'));
   renderHome();
   go('home');
+  saveUserData();
 }
 
 function deleteTx(id){
   state.transactions = state.transactions.filter(tx=>tx.id!==id);
   renderHome(); renderTxList(); renderStats();
+  saveUserData();
 }
 
 function txRow(tx, showDel){
@@ -998,6 +1156,7 @@ function saveBudget(){
   showToast(t('toastBudget'));
   renderHome();
   go('home');
+  saveUserData();
 }
 
 // ---------- Stats ----------
@@ -1065,11 +1224,13 @@ function addGoal(){
   document.getElementById('goalSaved').value = '';
   showToast(t('toastGoal'));
   renderGoals();
+  saveUserData();
 }
 
 function deleteGoal(id){
   state.goals = state.goals.filter(g=>g.id!==id);
   renderGoals();
+  saveUserData();
 }
 
 function renderGoals(){
@@ -1100,6 +1261,7 @@ function resetData(){
   state.budget = 3000;
   showToast(t('toastReset'));
   renderHome(); renderTxList(); renderStats(); renderGoals();
+  saveUserData();
 }
 
 // ---------- Pro subscription ----------
@@ -1125,6 +1287,7 @@ function subscribePlan(plan){
   updateProLocks();
   renderProScreen();
   updateProBadge();
+  saveUserData();
 }
 
 function cancelPro(){
@@ -1138,11 +1301,12 @@ function cancelPro(){
   updateProLocks();
   renderProScreen();
   updateProBadge();
+  saveUserData();
 }
 
 function updateProBadge(){
   document.getElementById('proHeaderBtn').style.opacity = state.isPro ? '1' : '';
-  document.getElementById('proBtnLabel').textContent = state.isPro ? (state.lang==='ar' ? 'Pro ✓' : 'Pro ✓') : 'Pro';
+  document.getElementById('proBtnLabel').textContent = state.isPro ? 'Pro ✓' : 'Pro';
 }
 
 function updateProLocks(){
@@ -1162,6 +1326,7 @@ function setAccentColor(color){
   ['Default','Blue','Purple','Green'].forEach(c=>{
     document.getElementById('swatch'+c).classList.toggle('active', c.toLowerCase()===color);
   });
+  saveUserData();
 }
 function applyAccentColor(){
   const c = ACCENT_COLORS[state.accentColor] || ACCENT_COLORS.default;
@@ -1178,6 +1343,7 @@ function setTextColor(color){
   ['Default','Blue','Purple','Green'].forEach(c=>{
     document.getElementById('tswatch'+c).classList.toggle('active', c.toLowerCase()===color);
   });
+  saveUserData();
 }
 function applyTextColor(){
   const c = TEXT_COLORS[state.textColor] || TEXT_COLORS.default;
@@ -1188,6 +1354,7 @@ function toggleAlerts(){
   if(!state.isPro){ go('pro'); return; }
   state.alertsEnabled = !state.alertsEnabled;
   document.getElementById('alertsToggle').classList.toggle('on', state.alertsEnabled);
+  saveUserData();
 }
 
 // ---------- Pie chart (Pro) ----------
@@ -1249,6 +1416,212 @@ function checkBudgetAlert(expense){
   else if(pct>=0.8){ showToast(t('alertNearBudget'), true); }
 }
 
+// =========================================================================
+// AUTH (Supabase)
+// =========================================================================
+function authGo(step){
+  document.querySelectorAll('.auth-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('authStep-'+step).classList.add('active');
+  ['phoneError','otpError','emailError'].forEach(id=>{
+    const el = document.getElementById(id); if(el){ el.textContent=''; el.classList.remove('show'); }
+  });
+}
+
+function showAuthError(id, msg){
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+async function authGoogle(){
+  try{
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.href }
+    });
+    if(error){ console.error(error); showToast(t('authError'), true); }
+    // Page will redirect to Google, then back here — onAuthStateChange handles the rest.
+  }catch(e){
+    console.error(e);
+    showToast(t('authError'), true);
+  }
+}
+
+async function sendPhoneCode(){
+  const phone = document.getElementById('phoneInput').value.trim();
+  if(!phone || phone.length < 8 || !phone.startsWith('+')){
+    showAuthError('phoneError', t('enterValidPhone'));
+    return;
+  }
+  try{
+    const { error } = await sb.auth.signInWithOtp({ phone });
+    if(error){ showAuthError('phoneError', error.message); return; }
+    pendingPhone = phone;
+    document.querySelectorAll('.otp-digit').forEach(inp=>inp.value='');
+    authGo('phone-otp');
+  }catch(e){
+    showAuthError('phoneError', t('authError'));
+  }
+}
+
+async function verifyPhoneCode(){
+  const code = Array.from(document.querySelectorAll('.otp-digit')).map(i=>i.value).join('');
+  if(code.length < 6){ showAuthError('otpError', t('wrongCode')); return; }
+  try{
+    const { data, error } = await sb.auth.verifyOtp({ phone: pendingPhone, token: code, type: 'sms' });
+    if(error){ showAuthError('otpError', error.message); return; }
+    // onAuthStateChange will handle the rest
+  }catch(e){
+    showAuthError('otpError', t('authError'));
+  }
+}
+
+function setEmailMode(mode){
+  emailMode = mode;
+  document.querySelectorAll('#emailSeg button').forEach(b=>b.classList.toggle('active', b.dataset.mode===mode));
+  document.getElementById('emailSubmitBtn').textContent = mode==='signup' ? t('signup') : t('login');
+}
+
+async function submitEmailAuth(){
+  const email = document.getElementById('emailInput').value.trim().toLowerCase();
+  const pw = document.getElementById('passwordInput').value;
+  if(!email || !email.includes('@') || !pw){
+    showAuthError('emailError', t('fillAllFields'));
+    return;
+  }
+  if(pw.length < 6){
+    showAuthError('emailError', t('passwordTooShort'));
+    return;
+  }
+  try{
+    if(emailMode === 'signup'){
+      const { data, error } = await sb.auth.signUp({ email, password: pw });
+      if(error){ showAuthError('emailError', error.message); return; }
+      if(data.session){
+        // auto-confirmed — onAuthStateChange handles it
+      } else {
+        showToast(t('confirmEmailSent'));
+      }
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+      if(error){ showAuthError('emailError', error.message); return; }
+      // onAuthStateChange handles it
+    }
+  }catch(e){
+    showAuthError('emailError', t('authError'));
+  }
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  currentUser = null;
+  document.getElementById('authOverlay').classList.remove('hidden');
+  authGo('methods');
+}
+
+function authMethodLabel(user){
+  const provider = user?.app_metadata?.provider || '';
+  if(provider === 'google') return t('methodGoogle');
+  if(user?.phone) return t('methodPhone');
+  return t('methodEmail');
+}
+
+function renderAccountCard(user){
+  const label = user.email || user.phone || '—';
+  document.getElementById('accountEmail').textContent = label;
+  document.getElementById('accountMethod').textContent = t('signedInAs') + ' · ' + authMethodLabel(user);
+  document.getElementById('accountAvatar').textContent = (label||'?').trim().charAt(0).toUpperCase();
+}
+
+function setSyncStatus(status){
+  const dot = document.getElementById('syncDot');
+  dot.classList.remove('syncing','error');
+  if(status==='syncing') dot.classList.add('syncing');
+  if(status==='error') dot.classList.add('error');
+}
+
+// ---------- Cloud data sync ----------
+async function loadUserData(userId){
+  try{
+    const { data, error } = await sb.from('user_data').select('data').eq('user_id', userId).maybeSingle();
+    if(error){ console.error(error); return; }
+    if(data && data.data){
+      Object.assign(state, data.data);
+    }
+  }catch(e){
+    console.error(e);
+  }
+}
+
+let saveTimer = null;
+function saveUserData(){
+  if(!currentUser) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    setSyncStatus('syncing');
+    const payload = {
+      transactions: state.transactions,
+      goals: state.goals,
+      budget: state.budget,
+      isPro: state.isPro,
+      proPlan: state.proPlan,
+      accentColor: state.accentColor,
+      textColor: state.textColor,
+      alertsEnabled: state.alertsEnabled,
+      lang: state.lang,
+      dark: state.dark,
+    };
+    try{
+      const { error } = await sb.from('user_data').upsert({
+        user_id: currentUser.id,
+        data: payload,
+        updated_at: new Date().toISOString(),
+      });
+      if(error){ console.error(error); setSyncStatus('error'); }
+      else setSyncStatus('idle');
+    }catch(e){
+      console.error(e);
+      setSyncStatus('error');
+    }
+  }, 500);
+}
+
+async function onSignedIn(user){
+  currentUser = user;
+  authGo('loading');
+  await loadUserData(user.id);
+  document.documentElement.classList.toggle('dark', state.dark);
+  document.getElementById('darkToggle').classList.toggle('on', state.dark);
+  applyAccentColor(); applyTextColor();
+  updateProLocks(); updateProBadge();
+  renderAccountCard(user);
+  document.getElementById('langSelect').value = state.lang;
+  setLang(state.lang);
+  document.getElementById('authOverlay').classList.add('hidden');
+  renderHome(); renderTxList(); renderStats(); renderGoals();
+}
+
+sb.auth.onAuthStateChange((event, session) => {
+  if(session && session.user){
+    if(!currentUser || currentUser.id !== session.user.id){
+      onSignedIn(session.user);
+    }
+  } else {
+    currentUser = null;
+    document.getElementById('authOverlay').classList.remove('hidden');
+    authGo('methods');
+  }
+});
+
+// OTP input auto-advance
+document.addEventListener('input', function(e){
+  if(e.target.classList.contains('otp-digit')){
+    if(e.target.value && e.target.nextElementSibling && e.target.nextElementSibling.classList.contains('otp-digit')){
+      e.target.nextElementSibling.focus();
+    }
+  }
+});
+
 // ---------- Init ----------
 function init(){
   buildCategoryChips();
@@ -1260,6 +1633,13 @@ function init(){
   updateProLocks();
   updateProBadge();
   renderHome();
+
+  // check for an existing session on load (handles page refresh + OAuth redirect return)
+  sb.auth.getSession().then(({ data }) => {
+    if(data.session && data.session.user){
+      onSignedIn(data.session.user);
+    }
+  });
 }
 init();
 </script>
