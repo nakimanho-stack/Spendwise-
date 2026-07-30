@@ -1807,4 +1807,33 @@ function hideSplashScreen(){
 }
 
 // Lightweight Material-style ripple on primary action buttons. Uses event
-// delegation (one listener) instead of attaching
+// delegation (one listener) instead of attaching handlers to every button,
+// and cleans up its own DOM node after the animation ends.
+function initRipples(){
+  const RIPPLE_SELECTOR = '.btn-primary, .plan-select-btn, .lock-upgrade-btn, .tab-fab, .auth-method-btn';
+  document.addEventListener('click', function(e){
+    const target = e.target.closest(RIPPLE_SELECTOR);
+    if(!target) return;
+    target.classList.add('ripple-host');
+    const rect = target.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+    target.appendChild(ripple);
+    ripple.addEventListener('animationend', ()=>ripple.remove());
+  });
+}
+
+init();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
