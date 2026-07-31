@@ -980,6 +980,7 @@ const I18N = {
     passwordTooShort:'كلمة المرور خاصها 6 حروف على الأقل', authError:'وقع خطأ، جرب مرة أخرى',
     signedInAs:'داخل بحساب', methodGoogle:'جوجل', methodEmail:'بريد إلكتروني', methodPhone:'هاتف',
     syncSaved:'تم الحفظ سحابيًا', syncError:'تعذر الحفظ السحابي', confirmEmailSent:'تحقق من بريدك الإلكتروني لتأكيد الحساب',
+    emailAlreadyRegistered:'هذا البريد الإلكتروني مسجّل من قبل — جرّب تسجيل الدخول بدل إنشاء حساب',
   },
   en: {
     appbarSub:'Track your spending smartly', usedOfBudget:'used', spentThisMonth:'Spent this month', editBudget:'Edit budget',
@@ -1021,6 +1022,7 @@ const I18N = {
     passwordTooShort:'Password must be at least 6 characters', authError:'Something went wrong, please try again',
     signedInAs:'Signed in as', methodGoogle:'Google', methodEmail:'Email', methodPhone:'Phone',
     syncSaved:'Saved to cloud', syncError:'Cloud save failed', confirmEmailSent:'Check your email to confirm your account',
+    emailAlreadyRegistered:'This email is already registered — try logging in instead',
   }
 };
 
@@ -1639,6 +1641,9 @@ function setEmailMode(mode){
   emailMode = mode;
   document.querySelectorAll('#emailSeg button').forEach(b=>b.classList.toggle('active', b.dataset.mode===mode));
   document.getElementById('emailSubmitBtn').textContent = mode==='signup' ? t('signup') : t('login');
+  const errEl = document.getElementById('emailError');
+  errEl.textContent = '';
+  errEl.classList.remove('show');
 }
 
 async function submitEmailAuth(){
@@ -1657,7 +1662,12 @@ async function submitEmailAuth(){
       const { data, error } = await sb.auth.signUp({ email, password: pw });
       if(error){ showAuthError('emailError', error.message); return; }
       if(data.session){
-        // auto-confirmed — onAuthStateChange handles it
+        // brand-new account, signed in immediately — onAuthStateChange handles it
+      } else if(data.user && (!data.user.identities || data.user.identities.length === 0)){
+        // Supabase's anti-enumeration behavior: this email is already registered
+        // (e.g. signed up earlier via Google or password) and it returns no error,
+        // just no session — surface this clearly instead of leaving the screen blank.
+        showAuthError('emailError', t('emailAlreadyRegistered'));
       } else {
         showToast(t('confirmEmailSent'));
       }
