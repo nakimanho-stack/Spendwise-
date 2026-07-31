@@ -920,8 +920,23 @@ const CATEGORIES = [
   { id:'other', ar:'أخرى', en:'Other', color:'#4B615F' },
 ];
 
+function defaultState(){
+  return {
+    lang: state.lang,   // keep the UI language choice across logout
+    dark: state.dark,   // keep the theme choice across logout
+    budget: 3000,
+    transactions: [],
+    goals: [],
+    isPro: false,
+    proPlan: null,
+    accentColor: 'default',
+    textColor: 'default',
+    alertsEnabled: false,
+  };
+}
+
 let state = {
-  lang: 'ar',
+  lang: 'en',
   dark: false,
   budget: 3000,
   transactions: [],
@@ -1684,6 +1699,9 @@ async function submitEmailAuth(){
 async function doLogout(){
   await sb.auth.signOut();
   currentUser = null;
+  state = defaultState();
+  applyAccentColor(); applyTextColor();
+  renderHome(); renderTxList(); renderStats(); renderGoals();
   document.getElementById('authOverlay').classList.remove('hidden');
   authGo('methods');
 }
@@ -1755,6 +1773,7 @@ function saveUserData(){
 
 async function onSignedIn(user){
   currentUser = user;
+  state = defaultState();
   authGo('loading');
   await loadUserData(user.id);
   state.isPro = false; state.proPlan = null; // never trust a locally-saved flag
@@ -1778,7 +1797,7 @@ sb.auth.onAuthStateChange((event, session) => {
     }
   } else {
     currentUser = null;
-    document.getElementById('authOverlay').classList.remove('hidden');
+document.getElementById('authOverlay').classList.remove('hidden');
     authGo('methods');
   }
 });
