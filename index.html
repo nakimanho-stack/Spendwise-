@@ -929,6 +929,7 @@ function defaultState(){
     goals: [],
     isPro: false,
     proPlan: null,
+    subPlatform: null,
     accentColor: 'default',
     textColor: 'default',
     alertsEnabled: false,
@@ -943,6 +944,7 @@ let state = {
   goals: [],
   isPro: false,
   proPlan: null,
+  subPlatform: null,
   accentColor: 'default',
   textColor: 'default',
   alertsEnabled: false,
@@ -984,7 +986,7 @@ const I18N = {
     pieTitle:'توزيع المصاريف (دائري)', lockPie:'خاصية Pro — اشترك لعرض المبيان الدائري',
     sixMonthTitle:'مقارنة آخر 6 أشهر', lockMultiMonth:'خاصية Pro — اشترك لعرض مقارنة الأشهر المتقدمة',
     toastSubscribed:'تم تفعيل اشتراك Pro بنجاح 🎉', toastCancelled:'تم إلغاء الاشتراك', activeUntil:'خطة',
-    androidOnlyNote:'الاشتراك متاح فقط عبر تطبيق أندرويد من Google Play',
+    androidOnlyNote:'الاشتراك متاح فقط عبر تطبيق أندرويد من Google Play', storeOnlyNote:'الاشتراك متاح فقط عبر تطبيق الهاتف (Google Play أو App Store)',
     alertNearBudget:'تنبيه: اقتربت من حد ميزانيتك الشهرية', alertOverBudget:'تنبيه: تجاوزت ميزانيتك الشهرية',
     authTag:'سجل الدخول لحفظ بياناتك عبر كل أجهزتك', continueGoogle:'المتابعة عبر جوجل', continuePhone:'المتابعة برقم الهاتف',
     continueEmail:'المتابعة بالبريد الإلكتروني', phoneNumber:'رقم الهاتف (مع رمز الدولة)', sendCodeSms:'إرسال رمز عبر SMS',
@@ -1026,7 +1028,7 @@ const I18N = {
     pieTitle:'Expense breakdown (pie chart)', lockPie:'Pro feature — subscribe to view the pie chart',
     sixMonthTitle:'Last 6 months comparison', lockMultiMonth:'Pro feature — subscribe to view advanced comparison',
     toastSubscribed:'Pro subscription activated 🎉', toastCancelled:'Subscription cancelled', activeUntil:'Plan',
-    androidOnlyNote:'Subscribing is only available through the Android app on Google Play',
+    androidOnlyNote:'Subscribing is only available through the Android app on Google Play', storeOnlyNote:'Subscribing is only available through the mobile app (Google Play or the App Store)',
     alertNearBudget:'Alert: you are close to your monthly budget', alertOverBudget:'Alert: you exceeded your monthly budget',
     authTag:'Sign in to save your data across all your devices', continueGoogle:'Continue with Google', continuePhone:'Continue with phone number',
     continueEmail:'Continue with email', phoneNumber:'Phone number (with country code)', sendCodeSms:'Send code via SMS',
@@ -1430,55 +1432,85 @@ function renderProScreen(){
 
 function selectPlan(plan){ subscribePlan(plan); }
 
-// ---------- Real subscription — Google Play Billing only ----------
-// Fill these in once you create the app + subscription products in Google Play Console.
-const GOOGLE_PLAY_PACKAGE_NAME = "YOUR_ANDROID_PACKAGE_NAME";   // e.g. com.yourcompany.spendwise
-const GOOGLE_PLAY_PRODUCT_ID_M6 = "YOUR_6_MONTH_PRODUCT_ID";    // subscription product id from Play Console
-const GOOGLE_PLAY_PRODUCT_ID_M12 = "YOUR_12_MONTH_PRODUCT_ID";  // subscription product id from Play Console
+// ---------- Real subscription — Google Play Billing (Android) + Apple In-App Purchase (iOS) ----------
+// Fill these in once you create the app + subscription products in each store.
+// Android — Google Play Console:
+const GOOGLE_PLAY_PACKAGE_NAME = "YOUR_ANDROID_PACKAGE_NAME";    // e.g. com.yourcompany.spendwise
+const GOOGLE_PLAY_PRODUCT_ID_M6 = "YOUR_6_MONTH_PRODUCT_ID";     // subscription product id from Play Console
+const GOOGLE_PLAY_PRODUCT_ID_M12 = "YOUR_12_MONTH_PRODUCT_ID";   // subscription product id from Play Console
+// iOS — App Store Connect:
+const APPLE_PRODUCT_ID_M6 = "YOUR_6_MONTH_PRODUCT_ID";           // subscription product id from App Store Connect
+const APPLE_PRODUCT_ID_M12 = "YOUR_12_MONTH_PRODUCT_ID";         // subscription product id from App Store Connect
+
+// Detects which store this build should sell through. Capacitor exposes
+// getPlatform() as 'android' | 'ios' | 'web' — this is the ONLY place in the
+// whole app that branches on platform for billing purposes. Everything else
+// (accounts, data, features, UI) is 100% shared between the two builds.
+function currentStorePlatform(){
+  if(window.Capacitor && typeof window.Capacitor.getPlatform === 'function'){
+    const p = window.Capacitor.getPlatform();
+    if(p === 'android' || p === 'ios') return p;
+  }
+  return 'web';
+}
 
 function subscribePlan(plan){
   if(!currentUser){ showToast(t('authError'), true); return; }
-  const productId = plan === 'm12' ? GOOGLE_PLAY_PRODUCT_ID_M12 : GOOGLE_PLAY_PRODUCT_ID_M6;
+  const platform = currentStorePlatform();
 
-  // When this app is wrapped as an Android app (Capacitor) with a Google Play
-  // Billing plugin installed, that plugin exposes itself here — launch the
-  // real purchase flow and verify it server-side once it completes.
-  const billing = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GooglePlayBilling;
-  if(billing && billing.purchase){
-    billing.purchase({ productId })
-      .then((result) => verifyGooglePlayPurchase(result.purchaseToken, productId))
-      .catch((e) => { console.error(e); showToast(t('authError'), true); });
-    return;
+  if(platform === 'android'){
+    const productId = plan === 'm12' ? GOOGLE_PLAY_PRODUCT_ID_M12 : GOOGLE_PLAY_PRODUCT_ID_M6;
+    const billing = window.Capacitor.Plugins && window.Capacitor.Plugins.GooglePlayBilling;
+    if(billing && billing.purchase){
+      billing.purchase({ productId })
+        .then((result) => verifyPurchase('google_play', { purchaseToken: result.purchaseToken, productId }))
+        .catch((e) => { console.error(e); showToast(t('authError'), true); });
+      return;
+    }
   }
 
-  // Google Play Billing can only run inside the Android app installed from
-  // Google Play — it cannot be triggered from a plain web page.
-  showToast(t('androidOnlyNote'), true);
+  if(platform === 'ios'){
+    const productId = plan === 'm12' ? APPLE_PRODUCT_ID_M12 : APPLE_PRODUCT_ID_M6;
+    const billing = window.Capacitor.Plugins && window.Capacitor.Plugins.AppleIAP;
+    if(billing && billing.purchase){
+      billing.purchase({ productId })
+        .then((result) => verifyPurchase('apple', { transactionId: result.transactionId, productId }))
+        .catch((e) => { console.error(e); showToast(t('authError'), true); });
+      return;
+    }
+  }
+
+  // Neither store's native billing plugin is available — we're running as a
+  // plain web page, where in-app purchases from either store can't run at all.
+  showToast(t('storeOnlyNote'), true);
 }
 
-// Sends the purchase token to our Edge Function, which verifies it directly
-// with Google's Play Developer API (server-side, using a service account)
-// before marking the user as Pro. The client can never set this itself.
-async function verifyGooglePlayPurchase(purchaseToken, productId){
+// Sends the purchase reference to the matching Edge Function, which verifies
+// it directly with Google's or Apple's own servers (never trusting the client)
+// before marking the user as Pro. Both functions write to the same
+// subscriptions table using the same shape, so nothing else in the app needs
+// to know or care which store made the sale.
+async function verifyPurchase(platform, payload){
   try{
     const { data: sessionData } = await sb.auth.getSession();
     const jwt = sessionData?.session?.access_token;
     if(!jwt) return;
-    const res = await fetch(SUPABASE_URL + '/functions/v1/verify-google-play-purchase', {
+    const fnName = platform === 'apple' ? 'verify-apple-purchase' : 'verify-google-play-purchase';
+    const res = await fetch(SUPABASE_URL + '/functions/v1/' + fnName, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + jwt,
         'apikey': SUPABASE_ANON_KEY,
       },
-      body: JSON.stringify({ purchaseToken, productId }),
+      body: JSON.stringify(payload),
     });
     const json = await res.json();
     if(json.ok){
       showToast(t('toastSubscribed'));
       await refreshSubscriptionStatus();
     } else {
-      console.error('verify-google-play-purchase failed', json);
+      console.error(fnName + ' failed', json);
       showToast(t('authError'), true);
     }
   }catch(e){
@@ -1487,9 +1519,10 @@ async function verifyGooglePlayPurchase(purchaseToken, productId){
   }
 }
 
-// Reads the real subscription status from Supabase. The client can never set
-// this itself — only the verify-google-play-purchase Edge Function (using the
-// service_role key, after verifying with Google) is allowed to write here.
+// Reads the real subscription status from Supabase — identical for both
+// platforms. The client can never set this itself — only the verify-* Edge
+// Functions (using the service_role key, after verifying with the respective
+// store) are allowed to write here.
 async function refreshSubscriptionStatus(){
   if(!currentUser) return;
   try{
@@ -1502,7 +1535,9 @@ async function refreshSubscriptionStatus(){
     const activeStatuses = ['active','trialing'];
     const notExpired = !data?.current_period_end || new Date(data.current_period_end) > new Date();
     state.isPro = !!(data && activeStatuses.includes(data.status) && notExpired);
-    state.proPlan = state.isPro ? (data.product_id === GOOGLE_PLAY_PRODUCT_ID_M12 ? 'm12' : 'm6') : null;
+    const m12Ids = [GOOGLE_PLAY_PRODUCT_ID_M12, APPLE_PRODUCT_ID_M12];
+    state.proPlan = state.isPro ? (m12Ids.includes(data.product_id) ? 'm12' : 'm6') : null;
+    state.subPlatform = state.isPro ? data.platform : null;
     updateProLocks();
     renderProScreen();
     updateProBadge();
@@ -1511,9 +1546,14 @@ async function refreshSubscriptionStatus(){
   }
 }
 
-// Google Play subscriptions are managed and canceled through the Play Store
-// itself, not through our app — this opens the official management page.
+// Subscriptions are managed and canceled through each store itself, not
+// through our app — open the correct official management page per platform.
 function cancelPro(){
+  const platform = state.subPlatform || currentStorePlatform();
+  if(platform === 'apple' || platform === 'ios'){
+    window.open('https://apps.apple.com/account/subscriptions', '_blank');
+    return;
+  }
   const productId = state.proPlan === 'm12' ? GOOGLE_PLAY_PRODUCT_ID_M12 : GOOGLE_PLAY_PRODUCT_ID_M6;
   const url = 'https://play.google.com/store/account/subscriptions?sku=' + encodeURIComponent(productId) + '&package=' + encodeURIComponent(GOOGLE_PLAY_PACKAGE_NAME);
   window.open(url, '_blank');
@@ -1797,7 +1837,7 @@ sb.auth.onAuthStateChange((event, session) => {
     }
   } else {
     currentUser = null;
-document.getElementById('authOverlay').classList.remove('hidden');
+    document.getElementById('authOverlay').classList.remove('hidden');
     authGo('methods');
   }
 });
